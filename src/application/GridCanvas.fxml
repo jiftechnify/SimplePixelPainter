@@ -5,28 +5,31 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<BorderPane prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
+<BorderPane fx:id="rootPane" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
-          <Menu mnemonicParsing="false" text="Edit">
+          <Menu mnemonicParsing="false" text="編集">
             <items>
-              <MenuItem fx:id="menuClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="Clear" />
-              <MenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" text="Grid On/Off" />
+              <MenuItem fx:id="menuClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="すべて消去" />
+              <MenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" text="グリッド表示切り替え" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked" text="グリッド/キャンバスのサイズ変更" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
    </top>
    <center>
-      <ScrollPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <content>
-            <Pane focusTraversable="true">
-               <children>
-                  <Canvas fx:id="canvas" height="512.0" onMouseClicked="#onCanvasClicked" onMouseDragged="#onCanvasDragged" width="512.0" />
-                  <Canvas fx:id="gridLayer" height="512.0" mouseTransparent="true" opacity="0.6" width="512.0" />
-               </children>
+      <ScrollPane prefHeight="400.0" prefWidth="400.0" BorderPane.alignment="CENTER">
+         <content>
+        	<Pane>
+        		<children>
+                  <Canvas fx:id="canvas" height="100.0" onMouseClicked="#onCanvasClicked" onMouseDragged="#onCanvasDragged" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                </children>
             </Pane>
         </content>
       </ScrollPane>
