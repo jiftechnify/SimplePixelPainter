@@ -67,7 +67,7 @@ public class GridCanvasModel {
 				row.trimToSize();
 			}
 		}
-		
+
 		numPixX = newX;
 		numPixY = newY;
 	}

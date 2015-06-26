@@ -1,33 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="rootPane" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
-        <menus>
-          <Menu mnemonicParsing="false" text="編集">
-            <items>
-              <MenuItem fx:id="menuClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="すべて消去" />
-              <MenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" text="グリッド表示切り替え" />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked" text="グリッド/キャンバスのサイズ変更" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
+      <VBox>
+         <children>
+            <MenuBar BorderPane.alignment="CENTER">
+              <menus>
+                <Menu mnemonicParsing="false" text="設定">
+                  <items>
+                        <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true" text="グリッド表示" />
+                        <Menu mnemonicParsing="false" text="描画方法">
+                          <items>
+                              <MenuItem fx:id="menuDrawtypeNormal" mnemonicParsing="false" onAction="#onMenuDrawtypeNormalClicked" text="通常" />
+                              <MenuItem fx:id="menuDrawtypeCur" mnemonicParsing="false" onAction="#onMenuDrawtypeCurClicked" text="始点の今の色で全て描画" />
+                            <MenuItem fx:id="menuDrawtypeNext" mnemonicParsing="false" onAction="#onMenuDrawtypeNextClicked" text="始点の次の色で全て描画" />
+                          </items>
+                        </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked" text="グリッド/キャンバスのサイズ変更" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <ToolBar prefHeight="35.0" prefWidth="400.0">
+              <items>
+                  <Label text="図形:" />
+                  <ChoiceBox fx:id="choiceShape" prefWidth="150.0" />
+                  <Separator orientation="VERTICAL" prefHeight="25.0" prefWidth="7.0" />
+                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="すべて消去" />
+              </items>
+            </ToolBar>
+         </children>
+      </VBox>
    </top>
    <center>
       <ScrollPane prefHeight="400.0" prefWidth="400.0" BorderPane.alignment="CENTER">
          <content>
         	<Pane>
         		<children>
-                  <Canvas fx:id="canvas" height="100.0" onMouseClicked="#onCanvasClicked" onMouseDragged="#onCanvasDragged" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                   <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                 </children>
             </Pane>

@@ -27,13 +27,13 @@ public enum PixelState {
 		Collections.unmodifiableMap(nextState);
 	}
 
-	public Color pixelColor(){
+	public Color color(){
 		return pxColor;
 	}
 	public static PixelState nextState(PixelState state){
 		if(nextState == null)
 			initNextState();
-		
+
 		return nextState.get(state);
 	}
 }
