@@ -103,34 +103,43 @@ public class GridCanvasController implements Initializable{
 	 * DrawStrategyは操作に応じて図形を描画するDrawCommandを生成し実行。
 	 *
 	 */
-	// FIXME ドラッグ中に画面外に行くと変な動きをするのでどうにかしよう
 	// コールバックメソッド
 	@FXML
 	private void onPressed(MouseEvent e){
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		PixelState startPosPixel = null;
-		boolean clear = false;
-		if(e.getButton() == MouseButton.SECONDARY)
-			clear = true;
-		else
-			startPosPixel = pixelArray.getAt(pos.x, pos.y);
-		strategy.onPressed(transformCoordinate(e.getX(), e.getY()), startPosPixel, clear);
+		if(pos != null){
+			PixelState startPosPixel = null;
+			boolean clear = false;
+			if(e.getButton() == MouseButton.SECONDARY)
+				clear = true;
+			else
+				startPosPixel = pixelArray.getAt(pos.x, pos.y);
+			strategy.onPressed(pos, startPosPixel, clear);
+		}
 	}
 	@FXML
 	private void onReleased(MouseEvent e){
-		strategy.onReleased(transformCoordinate(e.getX(), e.getY()));
+		Point pos = transformCoordinate(e.getX(), e.getY());
+		if(pos != null)
+			strategy.onReleased(pos);
 	}
 	@FXML
 	private void onDragged(MouseEvent e){
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		if(!pos.equals(prevPos))
+		if(pos != null && !pos.equals(prevPos)){
 			strategy.onDragged(pos);
-		prevPos = pos;
+			prevPos = pos;
+		}
 	}
 
-	// 画面の座標をグリッドの座標に変換
+	// 画面の座標をグリッドの座標に変換 画面外ならnullを返す
 	private Point transformCoordinate(double x, double y){
-		return new Point((int)(x / p.gridWidth), (int)(y / p.gridHeight));
+		int gridX = (int)(x / p.gridWidth);
+		int gridY = (int)(y / p.gridHeight);
+		if(gridX < 0 || gridX >= p.numPixelX || gridY < 0 || gridY >= p.numPixelY){
+			return null;
+		}
+		return new Point(gridX, gridY);
 	}
 	// 描画処理
 	public void drawPixel(int x, int y, PixelState startPosPixel, boolean clear){
