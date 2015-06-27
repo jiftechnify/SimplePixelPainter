@@ -1,4 +1,4 @@
-package application;
+package data;
 
 public class Point {
 	public final int x;

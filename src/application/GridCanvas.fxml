@@ -9,12 +9,18 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="rootPane" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
+<BorderPane fx:id="rootPane" prefHeight="560.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
    <top>
       <VBox>
          <children>
             <MenuBar BorderPane.alignment="CENTER">
               <menus>
+                  <Menu mnemonicParsing="false" text="編集">
+                    <items>
+                      <MenuItem fx:id="menuUndo" mnemonicParsing="false" onAction="#onMenuUndoClicked" text="元に戻す" />
+                        <MenuItem fx:id="menuRedo" mnemonicParsing="false" onAction="#onMenuRedoClicked" text="やり直す" />
+                    </items>
+                  </Menu>
                 <Menu mnemonicParsing="false" text="設定">
                   <items>
                         <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true" text="グリッド表示" />
@@ -31,12 +37,14 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <ToolBar prefHeight="35.0" prefWidth="400.0">
+            <ToolBar>
               <items>
                   <Label text="図形:" />
                   <ChoiceBox fx:id="choiceShape" prefWidth="150.0" />
+                  <Label fx:id="labelDrawtype" prefHeight="17.0" prefWidth="130.0" text="始点の今の色で全て描画" />
                   <Separator orientation="VERTICAL" prefHeight="25.0" prefWidth="7.0" />
                   <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="すべて消去" />
+                  <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Show" />
               </items>
             </ToolBar>
          </children>

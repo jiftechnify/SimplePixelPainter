@@ -8,8 +8,8 @@ import application.GridCanvasController;
 public class FreelineDrawCommand extends DrawCommand {
 	private List<LineDrawCommand> lines = new ArrayList<>();
 
-	public FreelineDrawCommand(GridCanvasController canvasController){
-		super(canvasController);
+	public FreelineDrawCommand(boolean clear, GridCanvasController canvasController){
+		super(clear, canvasController);
 	}
 
 	public void addLine(LineDrawCommand line){

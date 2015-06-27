@@ -1,11 +1,14 @@
 package drawstrategy;
 
 import application.GridCanvasController;
-import application.Point;
+import data.PixelState;
+import data.Point;
 import drawcommand.FilledRectDrawCommand;
 
 public class FilledRectDrawStrategy implements DrawStrategy {
 	private Point startPos;
+	private boolean clear;
+	private PixelState startPosPixel;
 	private GridCanvasController canvasController;
 
 	public FilledRectDrawStrategy(GridCanvasController canvasController){
@@ -13,15 +16,18 @@ public class FilledRectDrawStrategy implements DrawStrategy {
 	}
 
 	@Override
-	public void onPressed(Point pos) {
+	public void onPressed(Point pos, PixelState startPosPixel, boolean clear) {
 		startPos = pos;
+		this.startPosPixel = startPosPixel;
+		this.clear = clear;
 	}
 
 	@Override
 	public void onReleased(Point pos) {
-		FilledRectDrawCommand rect = new FilledRectDrawCommand(startPos, pos, canvasController);
+		FilledRectDrawCommand rect =
+				new FilledRectDrawCommand(startPos, pos, startPosPixel, clear, canvasController);
 		rect.execute();
-		canvasController.addHistory(rect);
+		canvasController.pushNewHistory(rect);
 	}
 
 	@Override

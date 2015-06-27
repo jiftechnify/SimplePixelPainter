@@ -1,17 +1,21 @@
 package drawcommand;
 
+import data.PixelState;
+import data.Point;
 import application.GridCanvasController;
-import application.Point;
 
 public class LineDrawCommand extends DrawCommand {
 	private Point start;
 	private Point end;
+	private PixelState startPosPixel;
+	private boolean clear;
 	private boolean egnoreStartPos = false;
 
-	public LineDrawCommand(Point start, Point end, GridCanvasController canvasController) {
-		super(canvasController);
+	public LineDrawCommand(Point start, Point end, PixelState startPosPixel, boolean clear, GridCanvasController canvasController) {
+		super(clear, canvasController);
 		this.start = start;
 		this.end = end;
+		this.startPosPixel = startPosPixel;
 	}
 
 	public void notPaintStartPos(){
@@ -40,7 +44,7 @@ public class LineDrawCommand extends DrawCommand {
 		deltaY = Math.abs(deltaY * 2);
 
 		if(!egnoreStartPos)
-			canvasController.drawPixel(nextX, nextY);
+			canvasController.drawPixel(nextX, nextY, startPosPixel, clear);
 
 		if (deltaX > deltaY) {
 			fraction = deltaY - deltaX / 2;
@@ -51,7 +55,7 @@ public class LineDrawCommand extends DrawCommand {
 				}
 				nextX += stepX;
 				fraction += deltaY;
-				canvasController.drawPixel(nextX, nextY);
+				canvasController.drawPixel(nextX, nextY, startPosPixel, clear);
 			}
 		} else {
 			fraction = deltaX - deltaY / 2;
@@ -62,7 +66,7 @@ public class LineDrawCommand extends DrawCommand {
 				}
 				nextY += stepY;
 				fraction += deltaX;
-				canvasController.drawPixel(nextX, nextY);
+				canvasController.drawPixel(nextX, nextY, startPosPixel, clear);
 			}
 		}
 	}
