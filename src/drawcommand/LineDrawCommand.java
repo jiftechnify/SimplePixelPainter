@@ -1,14 +1,13 @@
 package drawcommand;
 
+import application.GridCanvasController;
 import data.PixelState;
 import data.Point;
-import application.GridCanvasController;
 
 public class LineDrawCommand extends DrawCommand {
 	private Point start;
 	private Point end;
 	private PixelState startPosPixel;
-	private boolean clear;
 	private boolean egnoreStartPos = false;
 
 	public LineDrawCommand(Point start, Point end, PixelState startPosPixel, boolean clear, GridCanvasController canvasController) {

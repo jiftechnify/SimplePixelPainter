@@ -1,5 +1,7 @@
 package application;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Stack;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,14 +25,19 @@ import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ToolBar;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import javax.imageio.ImageIO;
+
 import data.PixelState;
 import data.Point;
 import data.Table;
@@ -47,6 +55,8 @@ public class GridCanvasController implements Initializable{
 	@FXML private BorderPane rootPane;
 	@FXML private Canvas canvas;
 	@FXML private Canvas gridLayer;
+
+	@FXML private MenuItem menuExport;
 	@FXML private MenuItem menuUndo;
 	@FXML private MenuItem menuRedo;
 	@FXML private CheckMenuItem menuGrid;
@@ -54,7 +64,7 @@ public class GridCanvasController implements Initializable{
 	@FXML private MenuItem menuDrawtypeNormal;
 	@FXML private MenuItem menuDrawtypeCur;
 	@FXML private MenuItem menuDrawtypeNext;
-	@FXML private ToolBar toolbar;
+
 	@FXML private ChoiceBox<String> choiceShape;
 	@FXML private Label labelDrawtype;
 	@FXML private Button btnClear;
@@ -65,6 +75,8 @@ public class GridCanvasController implements Initializable{
 
 	private GraphicsContext canvasGraphics;
 	private GraphicsContext gridGraphics;
+	private Canvas exportCanvas;
+	private GraphicsContext exportCanvasGraphics;
 
 	private GridCanvasModel pixelArray;
 
@@ -202,6 +214,33 @@ public class GridCanvasController implements Initializable{
 	 * メニューまわりの処理
 	 * いずれは別のクラスに移したい
 	 */
+	// 画像出力
+	@FXML
+	private void onMenuExportClicked(ActionEvent e){
+		exportCanvas = new Canvas();
+		exportCanvas.setWidth(p.numPixelX);
+		exportCanvas.setHeight(p.numPixelY);
+		exportCanvasGraphics = exportCanvas.getGraphicsContext2D();
+		for(int x = 0; x < p.numPixelX; x++){
+			for(int y = 0; y < p.numPixelY; y++){
+				exportCanvasGraphics.setFill(pixelArray.getAt(x, y).color());
+				exportCanvasGraphics.fillRect(x, y, 1.0, 1.0);
+			}
+		}
+		WritableImage writableImage = exportCanvas.snapshot(null, null);
+
+		FileChooser fc = new FileChooser();
+		fc.getExtensionFilters().add(new ExtensionFilter("PNGファイル", "*.png"));
+		File outFile = fc.showSaveDialog(rootPane.getScene().getWindow());
+		if(outFile != null){
+			try{
+				ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null), "png", outFile);
+			}
+			catch(IOException ex){
+				ex.printStackTrace();
+			}
+		}
+	}
 	// すべて消去
 	@FXML
 	private void onMenuClearClicked(ActionEvent e){
@@ -287,7 +326,7 @@ public class GridCanvasController implements Initializable{
 		canvasGraphics.setFill(Color.WHITE);
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
 
-		// リサイズ後はその前まで
+		// リサイズ後はリサイズした時点までしかアンドゥできない
 		history.removeAllElements();
 		pushNewHistory(new DrawtypeChangeCommand(this, drawtype));
 		undoHistory.removeAllElements();
@@ -392,5 +431,4 @@ public class GridCanvasController implements Initializable{
 	private void onbtnShow(ActionEvent e){
 		showArray();
 	}
-
 }

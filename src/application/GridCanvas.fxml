@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.control.*?>
@@ -8,13 +9,20 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import de.jensd.fx.glyphs.*?>
 
 <BorderPane fx:id="rootPane" prefHeight="560.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
    <top>
-      <VBox>
+      <VBox prefHeight="43.0" prefWidth="500.0">
          <children>
             <MenuBar BorderPane.alignment="CENTER">
               <menus>
+                  <Menu mnemonicParsing="false" text="ファイル">
+                    <items>
+                      <MenuItem fx:id="menuExport" mnemonicParsing="false" onAction="#onMenuExportClicked" text="画像ファイルに出力" />
+                    </items>
+                  </Menu>
                   <Menu mnemonicParsing="false" text="編集">
                     <items>
                       <MenuItem fx:id="menuUndo" mnemonicParsing="false" onAction="#onMenuUndoClicked" text="元に戻す" />
@@ -37,14 +45,49 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <ToolBar>
+            <ToolBar prefHeight="59.0" prefWidth="500.0">
               <items>
                   <Label text="図形:" />
                   <ChoiceBox fx:id="choiceShape" prefWidth="150.0" />
-                  <Label fx:id="labelDrawtype" prefHeight="17.0" prefWidth="130.0" text="始点の今の色で全て描画" />
-                  <Separator orientation="VERTICAL" prefHeight="25.0" prefWidth="7.0" />
-                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked" text="すべて消去" />
-                  <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Show" />
+                  <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
+                     <padding>
+                        <Insets left="2.0" />
+                     </padding></Separator>
+                  <Button mnemonicParsing="false" onAction="#onMenuUndoClicked">
+                     <graphic>
+                        <FontAwesomeIconView glyphName="UNDO" size="14.0" />
+                     </graphic>
+                     <tooltip>
+                        <Tooltip text="元に戻す" />
+                     </tooltip>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#onMenuRedoClicked">
+                     <graphic>
+                        <FontAwesomeIconView glyphName="REPEAT" size="14.0" />
+                     </graphic>
+                     <tooltip>
+                        <Tooltip text="やり直す" />
+                     </tooltip>
+                  </Button>
+                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked">
+                  	<graphic>
+                  		<FontAwesomeIconView glyphName="TRASH_ALT" size="14.0" />
+                  	</graphic>
+                     <tooltip>
+                        <Tooltip text="すべて消去" />
+                     </tooltip>
+                  </Button>
+                  <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
+                     <padding>
+                        <Insets left="2.0" />
+                     </padding>
+                  </Separator>
+                  <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="29.0" style="-fx-background-size: 15; -fx-background-color: #00ACED;">
+                     <graphic>
+                        <FontAwesomeIconView fill="WHITE" glyphName="TWITTER" size="14.0" text="" />
+                     </graphic>
+                  </Button>
+                  <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Debug" />
               </items>
             </ToolBar>
          </children>
@@ -62,4 +105,12 @@
         </content>
       </ScrollPane>
    </center>
+   <bottom>
+      <HBox prefHeight="17.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="描画方法:" />
+            <Label fx:id="labelDrawtype" prefHeight="17.0" prefWidth="130.0" />
+         </children>
+      </HBox>
+   </bottom>
 </BorderPane>
