@@ -55,6 +55,7 @@ public class GridCanvasController implements Initializable{
 	@FXML private BorderPane rootPane;
 	@FXML private Canvas canvas;
 	@FXML private Canvas gridLayer;
+	@FXML private Canvas previewLayer;
 
 	@FXML private MenuItem menuExport;
 	@FXML private MenuItem menuUndo;
@@ -75,6 +76,7 @@ public class GridCanvasController implements Initializable{
 
 	private GraphicsContext canvasGraphics;
 	private GraphicsContext gridGraphics;
+	private GraphicsContext previewGraphics;
 	private Canvas exportCanvas;
 	private GraphicsContext exportCanvasGraphics;
 
@@ -131,6 +133,7 @@ public class GridCanvasController implements Initializable{
 	}
 	@FXML
 	private void onReleased(MouseEvent e){
+		clearPreview();
 		Point pos = transformCoordinate(e.getX(), e.getY());
 		if(pos != null)
 			strategy.onReleased(pos);
@@ -138,7 +141,11 @@ public class GridCanvasController implements Initializable{
 	@FXML
 	private void onDragged(MouseEvent e){
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		if(pos != null && !pos.equals(prevPos)){
+		if(pos == null){
+			clearPreview();
+		}
+		else if(!pos.equals(prevPos)){
+			clearPreview();
 			strategy.onDragged(pos);
 			prevPos = pos;
 		}
@@ -176,6 +183,35 @@ public class GridCanvasController implements Initializable{
 		}
 		canvasGraphics.setFill(pixel.color());
 		canvasGraphics.fillRect(x * p.gridWidth, y * p.gridHeight, p.gridWidth, p.gridHeight);
+	}
+	// プレビュー描画
+	public void drawPreview(int x, int y, PixelState startPosPixel, boolean clear){
+		if(clear)
+			if(pixelArray.getAt(x, y).color().equals(Color.WHITE))
+				previewGraphics.setFill(Color.BLACK);
+			else
+				previewGraphics.setFill(Color.WHITE);
+		else{
+			switch(drawtype){
+			case NORMAL:
+				previewGraphics.setFill(PixelState.nextState(pixelArray.getAt(x, y)).color());
+				break;
+			case FILL_WITH_CURRENT_COLOR_AT_START_POS:
+				Color color = startPosPixel.color();
+				if(color.equals(pixelArray.getAt(x, y).color()))
+					previewGraphics.setFill(color.invert().darker());
+				else
+					previewGraphics.setFill(color);
+				break;
+			case FILL_WITH_NEXT_COLOR_AT_START_POS:
+				previewGraphics.setFill(PixelState.nextState(startPosPixel).color());
+			}
+		}
+		previewGraphics.fillRect(x * p.gridWidth, y * p.gridHeight, p.gridWidth, p.gridHeight);
+	}
+	// プレビューの消去
+	public void clearPreview(){
+		previewGraphics.clearRect(0.0, 0.0, previewLayer.getWidth(), previewLayer.getHeight());
 	}
 	// 全消去
 	public void clearAll(){
@@ -316,10 +352,9 @@ public class GridCanvasController implements Initializable{
 		}
 	}
 	private void resizeCanvas(GridCanvasProperty newP){
-		canvas.setWidth(newP.gridWidth * newP.numPixelX);
-		canvas.setHeight(newP.gridHeight * newP.numPixelY);
-		gridLayer.setWidth(newP.gridWidth * newP.numPixelX);
-		gridLayer.setHeight(newP.gridHeight * newP.numPixelY);
+		setCanvasSize(canvas);
+		setCanvasSize(previewLayer);
+		setCanvasSize(gridLayer);
 
 		pixelArray.resize(newP.numPixelX, newP.numPixelY);
 
@@ -375,6 +410,7 @@ public class GridCanvasController implements Initializable{
 
 		// キャンバスとグリッドのレイヤーのGraphicsContextを得る
 		canvasGraphics = canvas.getGraphicsContext2D();
+		previewGraphics = previewLayer.getGraphicsContext2D();
 		gridGraphics = gridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
@@ -384,10 +420,9 @@ public class GridCanvasController implements Initializable{
 		pixelArray = new GridCanvasModel(p.numPixelX, p.numPixelY);
 
 		// グリッドとキャンバスを初期化
-		canvas.setWidth(p.gridWidth * p.numPixelX);
-		canvas.setHeight(p.gridHeight * p.numPixelY);
-		gridLayer.setWidth(p.gridWidth * p.numPixelX);
-		gridLayer.setHeight(p.gridHeight * p.numPixelY);
+		setCanvasSize(canvas);
+		setCanvasSize(previewLayer);
+		setCanvasSize(gridLayer);
 		if(p.gridWidth > 2 && p.gridHeight > 2){
 			gridGraphics.setFill(GRID_COLOR);
 			for(int x = 0; x <= p.numPixelX; x++)
@@ -398,6 +433,10 @@ public class GridCanvasController implements Initializable{
 		canvasGraphics.setFill(Color.WHITE);
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
 		gridLayer.toFront();	// グリッドのレイヤーを前面へ
+	}
+	private void setCanvasSize(Canvas canvas){
+		canvas.setWidth(p.gridWidth * p.numPixelX);
+		canvas.setHeight(p.gridHeight * p.numPixelY);
 	}
 	private void initComboShape(){
 		nameToStrategy.put("自由線", new FreelineDrawStrategy(this));

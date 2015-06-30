@@ -98,8 +98,9 @@
          <content>
         	<Pane>
         		<children>
-                  <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                  <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0" />
+                  <Canvas fx:id="previewLayer" height="100.0" width="100.0" mouseTransparent="true"/>
+                  <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" />
                 </children>
             </Pane>
         </content>
