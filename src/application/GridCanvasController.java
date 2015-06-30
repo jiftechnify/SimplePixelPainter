@@ -54,13 +54,20 @@ import drawstrategy.LineDrawStrategy;
 public class GridCanvasController implements Initializable{
 	@FXML private BorderPane rootPane;
 	@FXML private Canvas canvas;
-	@FXML private Canvas gridLayer;
 	@FXML private Canvas previewLayer;
+	@FXML private Canvas gridLayer;
+	@FXML private Canvas accentGridLayer;
+
+	private GraphicsContext canvasGraphics;
+	private GraphicsContext previewGraphics;
+	private GraphicsContext gridGraphics;
+	private GraphicsContext accentGraphics;
 
 	@FXML private MenuItem menuExport;
 	@FXML private MenuItem menuUndo;
 	@FXML private MenuItem menuRedo;
 	@FXML private CheckMenuItem menuGrid;
+	@FXML private CheckMenuItem menuAccentGrid;
 	@FXML private MenuItem menuResize;
 	@FXML private MenuItem menuDrawtypeNormal;
 	@FXML private MenuItem menuDrawtypeCur;
@@ -74,9 +81,7 @@ public class GridCanvasController implements Initializable{
 
 	private GridCanvasProperty p;
 
-	private GraphicsContext canvasGraphics;
-	private GraphicsContext gridGraphics;
-	private GraphicsContext previewGraphics;
+
 	private Canvas exportCanvas;
 	private GraphicsContext exportCanvasGraphics;
 
@@ -107,7 +112,10 @@ public class GridCanvasController implements Initializable{
 	private Stack<Command> history = new Stack<>();
 	private Stack<Command> undoHistory = new Stack<>();
 
+	private int gridAccentMergin = 8;
+	private boolean isAccentGridVisible = false;
 	private static final Color GRID_COLOR = new Color(0.5, 0.5, 0.5, 1.0);
+	private static final Color GRID_COLOR_ACCENT = Color.RED;
 
 
 
@@ -288,11 +296,33 @@ public class GridCanvasController implements Initializable{
 	private void onMenuGridClicked(ActionEvent e){
 		if(gridLayer.isVisible()){
 			gridLayer.setVisible(false);
+			accentGridLayer.setVisible(false);
 			menuGrid.setSelected(false);
+			menuAccentGrid.setSelected(false);
+			menuAccentGrid.setDisable(true);
 		}
 		else{
 			gridLayer.setVisible(true);
+			accentGridLayer.setVisible(isAccentGridVisible);
 			menuGrid.setSelected(true);
+			menuAccentGrid.setDisable(false);
+			menuAccentGrid.setSelected(isAccentGridVisible);
+		}
+	}
+	// 強調グリッド表示切り替え
+	@FXML
+	private void onMenuAccentGridClicked(ActionEvent e){
+		if(gridLayer.isVisible()){
+			if(accentGridLayer.isVisible()){
+				isAccentGridVisible = false;
+				accentGridLayer.setVisible(false);
+				menuAccentGrid.setSelected(false);
+			}
+			else{
+				isAccentGridVisible = true;
+				accentGridLayer.setVisible(true);
+				menuAccentGrid.setSelected(true);
+			}
 		}
 	}
 	// 描画方法
@@ -351,12 +381,14 @@ public class GridCanvasController implements Initializable{
 			System.out.println("cancel");
 		}
 	}
-	private void resizeCanvas(GridCanvasProperty newP){
+	private void resizeCanvas(GridCanvasProperty newProperty){
+		p = newProperty;
 		setCanvasSize(canvas);
 		setCanvasSize(previewLayer);
 		setCanvasSize(gridLayer);
+		setCanvasSize(accentGridLayer);
 
-		pixelArray.resize(newP.numPixelX, newP.numPixelY);
+		pixelArray.resize(p.numPixelX, p.numPixelY);
 
 		canvasGraphics.setFill(Color.WHITE);
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
@@ -365,19 +397,10 @@ public class GridCanvasController implements Initializable{
 		history.removeAllElements();
 		pushNewHistory(new DrawtypeChangeCommand(this, drawtype));
 		undoHistory.removeAllElements();
-		redrawInResize(newP);
+		redrawInResize(p);
 
 		// グリッドを描き換え
-		gridGraphics.clearRect(0.0, 0.0, gridLayer.getWidth(), gridLayer.getHeight());
-		if(newP.gridWidth > 2 && newP.gridHeight > 2){
-			gridGraphics.setFill(GRID_COLOR);
-			for(int x = 0; x <= newP.numPixelX; x++)
-				gridGraphics.fillRect(newP.gridWidth * x, 0.0, 1.0, gridLayer.getHeight());
-			for(int y = 0; y <= newP.numPixelY; y++)
-				gridGraphics.fillRect(0.0, newP.gridHeight * y, gridLayer.getWidth(), 1.0);
-		}
-
-		p = newP;
+		drawGrid();
 	}
 	private void redrawInResize(GridCanvasProperty newP){
 		RedrawCommand c = new RedrawCommand(newP.numPixelX, newP.numPixelY, this);
@@ -412,6 +435,7 @@ public class GridCanvasController implements Initializable{
 		canvasGraphics = canvas.getGraphicsContext2D();
 		previewGraphics = previewLayer.getGraphicsContext2D();
 		gridGraphics = gridLayer.getGraphicsContext2D();
+		accentGraphics = accentGridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
 		p = new GridCanvasProperty(10, 10, 32, 32);
@@ -423,20 +447,32 @@ public class GridCanvasController implements Initializable{
 		setCanvasSize(canvas);
 		setCanvasSize(previewLayer);
 		setCanvasSize(gridLayer);
-		if(p.gridWidth > 2 && p.gridHeight > 2){
-			gridGraphics.setFill(GRID_COLOR);
-			for(int x = 0; x <= p.numPixelX; x++)
-				gridGraphics.fillRect(p.gridWidth * x, 0.0, 1.0, gridLayer.getHeight());
-			for(int y = 0; y <= p.numPixelY; y++)
-				gridGraphics.fillRect(0.0, p.gridHeight * y, gridLayer.getWidth(), 1.0);
-		}
+		setCanvasSize(accentGridLayer);
+		drawGrid();
+
 		canvasGraphics.setFill(Color.WHITE);
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
-		gridLayer.toFront();	// グリッドのレイヤーを前面へ
 	}
 	private void setCanvasSize(Canvas canvas){
 		canvas.setWidth(p.gridWidth * p.numPixelX);
 		canvas.setHeight(p.gridHeight * p.numPixelY);
+	}
+	private void drawGrid(){
+		gridGraphics.clearRect(0.0, 0.0, gridLayer.getWidth(), gridLayer.getHeight());
+		if(p.gridWidth > 2 && p.gridHeight > 2){
+			gridGraphics.setFill(GRID_COLOR);
+			accentGraphics.setFill(GRID_COLOR_ACCENT);
+			for(int x = 0; x <= p.numPixelX; x++){
+				gridGraphics.fillRect(p.gridWidth * x, 0.0, 1.0, gridLayer.getHeight());
+				if(x != 0 && x % gridAccentMergin == 0)
+					accentGraphics.fillRect(p.gridWidth * x, 0.0, 1.0, accentGridLayer.getHeight());
+			}
+			for(int y = 0; y <= p.numPixelY; y++){
+				gridGraphics.fillRect(0.0, p.gridHeight * y, gridLayer.getWidth(), 1.0);
+				if(y != 0 && y % gridAccentMergin == 0)
+					accentGraphics.fillRect(0.0, p.gridHeight * y, accentGridLayer.getWidth(), 1.0);
+			}
+		}
 	}
 	private void initComboShape(){
 		nameToStrategy.put("自由線", new FreelineDrawStrategy(this));

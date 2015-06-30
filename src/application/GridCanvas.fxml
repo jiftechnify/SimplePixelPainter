@@ -31,7 +31,6 @@
                   </Menu>
                 <Menu mnemonicParsing="false" text="設定">
                   <items>
-                        <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true" text="グリッド表示" />
                         <Menu mnemonicParsing="false" text="描画方法">
                           <items>
                               <MenuItem fx:id="menuDrawtypeNormal" mnemonicParsing="false" onAction="#onMenuDrawtypeNormalClicked" text="通常" />
@@ -39,6 +38,10 @@
                             <MenuItem fx:id="menuDrawtypeNext" mnemonicParsing="false" onAction="#onMenuDrawtypeNextClicked" text="始点の次の色で全て描画" />
                           </items>
                         </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true" text="グリッド表示" />
+                        <CheckMenuItem fx:id="menuAccentGrid" mnemonicParsing="false" onAction="#onMenuAccentGridClicked" text="強調グリッド表示" />
+                        <MenuItem mnemonicParsing="false" text="強調グリッドの設定" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked" text="グリッド/キャンバスのサイズ変更" />
                   </items>
@@ -99,8 +102,9 @@
         	<Pane>
         		<children>
                   <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0" />
-                  <Canvas fx:id="previewLayer" height="100.0" width="100.0" mouseTransparent="true"/>
+                  <Canvas fx:id="previewLayer" height="100.0" mouseTransparent="true" width="100.0" />
                   <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" />
+                  <Canvas fx:id="accentGridLayer" height="100.0" mouseTransparent="true" opacity="0.8" visible="false" width="100.0" />
                 </children>
             </Pane>
         </content>
