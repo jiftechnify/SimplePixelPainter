@@ -87,7 +87,7 @@ public class GridCanvasController implements Initializable{
 
 	private GridCanvasModel pixelArray;
 
-	private Point prevPos = new Point(-1, -1);
+	private Point prevPos = Point.DUMMY_POINT;
 
 	public enum Drawtype{
 		NORMAL("通常"),
@@ -116,8 +116,6 @@ public class GridCanvasController implements Initializable{
 	private boolean isAccentGridVisible = false;
 	private static final Color GRID_COLOR = new Color(0.5, 0.5, 0.5, 1.0);
 	private static final Color GRID_COLOR_ACCENT = Color.RED;
-
-
 
 	/*
 	 * 描画
@@ -151,6 +149,7 @@ public class GridCanvasController implements Initializable{
 		Point pos = transformCoordinate(e.getX(), e.getY());
 		if(pos == null){
 			clearPreview();
+			prevPos = Point.DUMMY_POINT;
 		}
 		else if(!pos.equals(prevPos)){
 			clearPreview();
@@ -161,8 +160,8 @@ public class GridCanvasController implements Initializable{
 
 	// 画面の座標をグリッドの座標に変換 画面外ならnullを返す
 	private Point transformCoordinate(double x, double y){
-		int gridX = (int)(x / p.gridWidth);
-		int gridY = (int)(y / p.gridHeight);
+		int gridX = (int)(x / p.gridSize);
+		int gridY = (int)(y / p.gridSize);
 		if(gridX < 0 || gridX >= p.numPixelX || gridY < 0 || gridY >= p.numPixelY){
 			return null;
 		}
@@ -190,7 +189,7 @@ public class GridCanvasController implements Initializable{
 			}
 		}
 		canvasGraphics.setFill(pixel.color());
-		canvasGraphics.fillRect(x * p.gridWidth, y * p.gridHeight, p.gridWidth, p.gridHeight);
+		canvasGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 	}
 	// プレビュー描画
 	public void drawPreview(int x, int y, PixelState startPosPixel, boolean clear){
@@ -215,7 +214,7 @@ public class GridCanvasController implements Initializable{
 				previewGraphics.setFill(PixelState.nextState(startPosPixel).color());
 			}
 		}
-		previewGraphics.fillRect(x * p.gridWidth, y * p.gridHeight, p.gridWidth, p.gridHeight);
+		previewGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 	}
 	// プレビューの消去
 	public void clearPreview(){
@@ -383,10 +382,7 @@ public class GridCanvasController implements Initializable{
 	}
 	private void resizeCanvas(GridCanvasProperty newProperty){
 		p = newProperty;
-		setCanvasSize(canvas);
-		setCanvasSize(previewLayer);
-		setCanvasSize(gridLayer);
-		setCanvasSize(accentGridLayer);
+		setCanvasSize();
 
 		pixelArray.resize(p.numPixelX, p.numPixelY);
 
@@ -417,7 +413,7 @@ public class GridCanvasController implements Initializable{
 			for(int y = 0; y < pixelRedraw.numY(); y++){
 				pixelArray.setAt(x, y, pixelRedraw.getAt(x, y));
 				canvasGraphics.setFill(pixelRedraw.getAt(x, y).color());
-				canvasGraphics.fillRect(x * p.gridWidth, y * p.gridHeight, p.gridWidth, p.gridHeight);
+				canvasGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 			}
 		}
 	}
@@ -438,39 +434,45 @@ public class GridCanvasController implements Initializable{
 		accentGraphics = accentGridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
-		p = new GridCanvasProperty(10, 10, 32, 32);
+		p = new GridCanvasProperty(10, 32, 32);
 
 		// 各ピクセルの内容を管理するModelを生成
 		pixelArray = new GridCanvasModel(p.numPixelX, p.numPixelY);
 
 		// グリッドとキャンバスを初期化
-		setCanvasSize(canvas);
-		setCanvasSize(previewLayer);
-		setCanvasSize(gridLayer);
-		setCanvasSize(accentGridLayer);
+		setCanvasSize();
 		drawGrid();
 
 		canvasGraphics.setFill(Color.WHITE);
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
 	}
-	private void setCanvasSize(Canvas canvas){
-		canvas.setWidth(p.gridWidth * p.numPixelX);
-		canvas.setHeight(p.gridHeight * p.numPixelY);
+	// キャンバスと各レイヤーの大きさを設定する
+	private void setCanvasSize(){
+		canvas.setWidth(p.gridSize * p.numPixelX);
+		canvas.setHeight(p.gridSize * p.numPixelY);
+		previewLayer.setWidth(p.gridSize * p.numPixelX);
+		previewLayer.setHeight(p.gridSize * p.numPixelY);
+		gridLayer.setWidth(p.gridSize * p.numPixelX);
+		gridLayer.setHeight(p.gridSize * p.numPixelY);
+		accentGridLayer.setWidth(p.gridSize * p.numPixelX);
+		accentGridLayer.setHeight(p.gridSize * p.numPixelY);
 	}
+	// グリッドを描画
 	private void drawGrid(){
 		gridGraphics.clearRect(0.0, 0.0, gridLayer.getWidth(), gridLayer.getHeight());
-		if(p.gridWidth > 2 && p.gridHeight > 2){
+		accentGraphics.clearRect(0.0, 0.0, accentGridLayer.getWidth(), accentGridLayer.getHeight());
+		if(p.gridSize > 2 && p.gridSize > 2){
 			gridGraphics.setFill(GRID_COLOR);
 			accentGraphics.setFill(GRID_COLOR_ACCENT);
 			for(int x = 0; x <= p.numPixelX; x++){
-				gridGraphics.fillRect(p.gridWidth * x, 0.0, 1.0, gridLayer.getHeight());
+				gridGraphics.fillRect(p.gridSize * x, 0.0, 1.0, gridLayer.getHeight());
 				if(x != 0 && x % gridAccentMergin == 0)
-					accentGraphics.fillRect(p.gridWidth * x, 0.0, 1.0, accentGridLayer.getHeight());
+					accentGraphics.fillRect(p.gridSize * x, 0.0, 1.0, accentGridLayer.getHeight());
 			}
 			for(int y = 0; y <= p.numPixelY; y++){
-				gridGraphics.fillRect(0.0, p.gridHeight * y, gridLayer.getWidth(), 1.0);
+				gridGraphics.fillRect(0.0, p.gridSize * y, gridLayer.getWidth(), 1.0);
 				if(y != 0 && y % gridAccentMergin == 0)
-					accentGraphics.fillRect(0.0, p.gridHeight * y, accentGridLayer.getWidth(), 1.0);
+					accentGraphics.fillRect(0.0, p.gridSize * y, accentGridLayer.getWidth(), 1.0);
 			}
 		}
 	}

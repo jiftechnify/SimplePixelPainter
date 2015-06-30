@@ -7,7 +7,6 @@ import drawcommand.FreelineDrawCommand;
 import drawcommand.LineDrawCommand;
 
 public class FreelineDrawStrategy implements DrawStrategy{
-	private static final Point DUMMY = new Point(-1, -1);
 	private GridCanvasController canvasController;
 	private FreelineDrawCommand freeline;
 	private Point prevPos;
@@ -16,7 +15,7 @@ public class FreelineDrawStrategy implements DrawStrategy{
 
 	public FreelineDrawStrategy(GridCanvasController canvasController){
 		this.canvasController = canvasController;
-		prevPos = DUMMY;
+		prevPos = Point.DUMMY_POINT;
 	}
 	@Override
 	public void onPressed(Point pos, PixelState startPosPixel, boolean clear) {
@@ -26,13 +25,13 @@ public class FreelineDrawStrategy implements DrawStrategy{
 		LineDrawCommand startPoint = new LineDrawCommand(pos, pos, startPosPixel, clear, canvasController);
 		startPoint.execute();
 		freeline.addLine(startPoint);
-		prevPos = pos;
+		prevPos = Point.DUMMY_POINT;
 	}
 
 	@Override
 	public void onReleased(Point pos) {
 		canvasController.pushNewHistory(freeline);
-		prevPos = DUMMY;
+		prevPos = Point.DUMMY_POINT;
 	}
 	@Override
 	public void onDragged(Point pos) {

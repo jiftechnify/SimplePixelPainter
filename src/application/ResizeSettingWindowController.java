@@ -17,8 +17,7 @@ public class ResizeSettingWindowController implements Initializable{
 	@FXML private Button btnReset;
 	@FXML private Button btnOK;
 	@FXML private Button btnCancel;
-	@FXML private TextField txtGridW;
-	@FXML private TextField txtGridH;
+	@FXML private TextField txtGridSize;
 	@FXML private TextField txtNumPxX;
 	@FXML private TextField txtNumPxY;
 
@@ -35,20 +34,18 @@ public class ResizeSettingWindowController implements Initializable{
 	private void onBtnResetClicked(ActionEvent e){
 		resetProperty();
 	}
-	
+
 	private void resetProperty(){
-		txtGridW.setText(String.valueOf(property.gridWidth));
-		txtGridH.setText(String.valueOf(property.gridHeight));
+		txtGridSize.setText(String.valueOf(property.gridSize));
 		txtNumPxX.setText(String.valueOf(property.numPixelX));
 		txtNumPxY.setText(String.valueOf(property.numPixelY));
 	}
 
 	@FXML
 	private void onBtnOKClicked(ActionEvent e){
-		int gridW,gridH,numPxX,numPxY;
+		int gridSize,numPxX,numPxY;
 		try{
-			gridW  = Integer.valueOf(txtGridW.getText());
-			gridH  = Integer.valueOf(txtGridH.getText());
+			gridSize  = Integer.valueOf(txtGridSize.getText());
 			numPxX = Integer.valueOf(txtNumPxX.getText());
 			numPxY = Integer.valueOf(txtNumPxY.getText());
 		}
@@ -57,12 +54,12 @@ public class ResizeSettingWindowController implements Initializable{
 			resetProperty();
 			return;
 		}
-		if(gridW <= 0 || gridH <= 0 || numPxX <= 0 || numPxY <= 0){
+		if(gridSize <= 0 || numPxX <= 0 || numPxY <= 0){
 			showAlert();
 			resetProperty();
 			return;
 		}
-		newProperty = new GridCanvasProperty(gridW, gridH, numPxX, numPxY);
+		newProperty = new GridCanvasProperty(gridSize, numPxX, numPxY);
 		okPressed = true;
 		getWindow().hide();
 	}
@@ -85,11 +82,10 @@ public class ResizeSettingWindowController implements Initializable{
 	}
 	public void receiveProperty(GridCanvasProperty property){
 		this.property = property;
-		txtGridW.setText(String.valueOf(property.gridWidth));
-		txtGridH.setText(String.valueOf(property.gridHeight));
+		txtGridSize.setText(String.valueOf(property.gridSize));
 		txtNumPxX.setText(String.valueOf(property.numPixelX));
 		txtNumPxY.setText(String.valueOf(property.numPixelY));
-		
+
 	}
 	public GridCanvasProperty getNewProperty(){
 		return newProperty;

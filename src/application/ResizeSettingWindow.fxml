@@ -11,22 +11,16 @@
       <Label text="グリッドサイズ" />
       <HBox prefHeight="22.0" prefWidth="300.0">
          <children>
-            <Label prefHeight="21.0" prefWidth="40.0" text="幅 : ">
+            <Label prefHeight="21.0" prefWidth="54.0" text="大きさ : ">
                <padding>
-                  <Insets left="10.0" top="4.0" />
+                  <Insets left="8.0" top="4.0" />
                </padding>
             </Label>
-            <TextField fx:id="txtGridW" prefHeight="25.0" prefWidth="60.0">
+            <TextField fx:id="txtGridSize" prefHeight="25.0" prefWidth="60.0">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
             </TextField>
-            <Label prefHeight="21.0" prefWidth="60.0" text="高さ : ">
-               <padding>
-                  <Insets left="20.0" top="4.0" />
-               </padding>
-            </Label>
-            <TextField fx:id="txtGridH" prefHeight="25.0" prefWidth="60.0" />
          </children>
          <padding>
             <Insets bottom="5.0" top="5.0" />
@@ -36,19 +30,19 @@
       <Label text="キャンバスサイズ(縦横のピクセル数)" />
       <HBox prefHeight="22.0" prefWidth="300.0">
          <children>
-            <Label prefHeight="21.0" prefWidth="40.0" text="X : ">
+            <Label alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="50.0" text="X : ">
                <padding>
-                  <Insets left="10.0" top="4.0" />
+                  <Insets top="4.0" />
                </padding>
             </Label>
-            <TextField fx:id="txtNumPxX" prefHeight="25.0" prefWidth="60.0">
+            <TextField fx:id="txtNumPxX" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefHeight="25.0" prefWidth="60.0">
                <HBox.margin>
-                  <Insets />
+                  <Insets left="4.0" />
                </HBox.margin>
             </TextField>
-            <Label prefHeight="21.0" prefWidth="60.0" text="Y : ">
+            <Label alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="34.0" text="Y : ">
                <padding>
-                  <Insets left="20.0" top="4.0" />
+                  <Insets top="4.0" />
                </padding>
             </Label>
             <TextField fx:id="txtNumPxY" prefHeight="25.0" prefWidth="60.0" />

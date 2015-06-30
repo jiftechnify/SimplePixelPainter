@@ -1,19 +1,17 @@
 package application;
 
 class GridCanvasProperty {
-	final int gridWidth;
-	final int gridHeight;
+	final int gridSize;
 	final int numPixelX;
 	final int numPixelY;
 
-	GridCanvasProperty(int gridWidth, int gridHeight, int numPixelX, int numPixelY){
-		this.gridWidth = gridWidth;
-		this.gridHeight = gridHeight;
+	GridCanvasProperty(int gridSize, int numPixelX, int numPixelY){
+		this.gridSize = gridSize;
 		this.numPixelX = numPixelX;
 		this.numPixelY = numPixelY;
 	}
 
 	public String toString(){
-		return "GridSize(" + gridWidth + ", " + gridHeight + "), CanvasSize(" + numPixelX + ", " + numPixelY + ")";
+		return "GridSize(" + gridSize + ", " + gridSize + "), CanvasSize(" + numPixelX + ", " + numPixelY + ")";
 	}
 }

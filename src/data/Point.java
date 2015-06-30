@@ -1,6 +1,7 @@
 package data;
 
 public class Point {
+	public static final Point DUMMY_POINT = new Point(-1, -1);
 	public final int x;
 	public final int y;
 
@@ -33,6 +34,4 @@ public class Point {
 			return false;
 		return true;
 	}
-
-
 }
