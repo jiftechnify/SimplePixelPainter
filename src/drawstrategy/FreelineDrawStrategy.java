@@ -25,7 +25,7 @@ public class FreelineDrawStrategy implements DrawStrategy{
 		LineDrawCommand startPoint = new LineDrawCommand(pos, pos, startPosPixel, clear, canvasController);
 		startPoint.execute();
 		freeline.addLine(startPoint);
-		prevPos = Point.DUMMY_POINT;
+		prevPos = pos;
 	}
 
 	@Override

@@ -149,7 +149,7 @@ public class GridCanvasController implements Initializable{
 		Point pos = transformCoordinate(e.getX(), e.getY());
 		if(pos == null){
 			clearPreview();
-			prevPos = Point.DUMMY_POINT;
+			//prevPos = Point.DUMMY_POINT;
 		}
 		else if(!pos.equals(prevPos)){
 			clearPreview();
@@ -434,7 +434,7 @@ public class GridCanvasController implements Initializable{
 		accentGraphics = accentGridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
-		p = new GridCanvasProperty(10, 32, 32);
+		p = new GridCanvasProperty(12, 24, 24);
 
 		// 各ピクセルの内容を管理するModelを生成
 		pixelArray = new GridCanvasModel(p.numPixelX, p.numPixelY);

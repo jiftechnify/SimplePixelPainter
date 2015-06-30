@@ -12,11 +12,11 @@
 <?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import de.jensd.fx.glyphs.*?>
 
-<BorderPane fx:id="rootPane" prefHeight="560.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
+<BorderPane fx:id="rootPane" prefHeight="600.0" prefWidth="523.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
    <top>
-      <VBox prefHeight="43.0" prefWidth="500.0">
+      <VBox prefHeight="60.0" prefWidth="500.0">
          <children>
-            <MenuBar BorderPane.alignment="CENTER">
+            <MenuBar prefHeight="25.0" BorderPane.alignment="CENTER">
               <menus>
                   <Menu mnemonicParsing="false" text="ファイル">
                     <items>
@@ -48,7 +48,7 @@
                 </Menu>
               </menus>
             </MenuBar>
-            <ToolBar prefHeight="59.0" prefWidth="500.0">
+            <ToolBar prefHeight="35.0">
               <items>
                   <Label text="図形:" />
                   <ChoiceBox fx:id="choiceShape" prefWidth="150.0" />
@@ -111,7 +111,7 @@
       </ScrollPane>
    </center>
    <bottom>
-      <HBox prefHeight="17.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+      <HBox prefHeight="17.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="描画方法:" />
             <Label fx:id="labelDrawtype" prefHeight="17.0" prefWidth="130.0" />
