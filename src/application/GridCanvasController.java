@@ -1,16 +1,13 @@
 package application;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Stack;
-
+import data.PixelState;
+import data.Point;
+import data.Table;
+import drawcommand.ClearAllCommand;
+import drawcommand.Command;
+import drawcommand.DrawtypeChangeCommand;
+import drawcommand.RedrawCommand;
+import drawstrategy.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,11 +17,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -37,19 +32,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import javax.imageio.ImageIO;
-
-import data.PixelState;
-import data.Point;
-import data.Table;
-import drawcommand.ClearAllCommand;
-import drawcommand.Command;
-import drawcommand.DrawtypeChangeCommand;
-import drawcommand.RedrawCommand;
-import drawstrategy.DrawStrategy;
-import drawstrategy.EmptyRectDrawStrategy;
-import drawstrategy.FilledRectDrawStrategy;
-import drawstrategy.FreelineDrawStrategy;
-import drawstrategy.LineDrawStrategy;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 public class GridCanvasController implements Initializable{
 	@FXML private BorderPane rootPane;
@@ -63,24 +49,13 @@ public class GridCanvasController implements Initializable{
 	private GraphicsContext gridGraphics;
 	private GraphicsContext accentGraphics;
 
-	@FXML private MenuItem menuExport;
-	@FXML private MenuItem menuUndo;
-	@FXML private MenuItem menuRedo;
 	@FXML private CheckMenuItem menuGrid;
 	@FXML private CheckMenuItem menuAccentGrid;
-	@FXML private MenuItem menuResize;
-	@FXML private MenuItem menuDrawtypeNormal;
-	@FXML private MenuItem menuDrawtypeCur;
-	@FXML private MenuItem menuDrawtypeNext;
 
 	@FXML private ChoiceBox<String> choiceShape;
 	@FXML private Label labelDrawtype;
-	@FXML private Button btnClear;
-
-	@FXML private Button btnShow; // TODO デバッグ用
 
 	private GridCanvasProperty p;
-
 
 	private Canvas exportCanvas;
 	private GraphicsContext exportCanvasGraphics;
@@ -104,7 +79,6 @@ public class GridCanvasController implements Initializable{
 		}
 	}
 	private final Map<String, DrawStrategy> nameToStrategy = new HashMap<>();
-	private List<String> shapeName;
 
 	private Drawtype drawtype;
 	private DrawStrategy strategy;
@@ -179,9 +153,9 @@ public class GridCanvasController implements Initializable{
 				pixelArray.setAt(x, y, pixel = PixelState.nextState(pixelArray.getAt(x, y)));
 				break;
 			case FILL_WITH_CURRENT_COLOR_AT_START_POS:
-				pixelArray.setAt(x, y, pixel = startPosPixel);
 				if(startPosPixel == PixelState.WHITE)
-					pixel = PixelState.BLACK;
+					startPosPixel = PixelState.BLACK;
+				pixelArray.setAt(x, y, pixel = startPosPixel);
 				break;
 			case FILL_WITH_NEXT_COLOR_AT_START_POS:
 				pixelArray.setAt(x, y, pixel = PixelState.nextState(startPosPixel));
@@ -482,7 +456,7 @@ public class GridCanvasController implements Initializable{
 		nameToStrategy.put("長方形(塗りつぶし)", new FilledRectDrawStrategy(this));
 		nameToStrategy.put("長方形(塗りつぶしなし)", new EmptyRectDrawStrategy(this));
 		Collections.unmodifiableMap(nameToStrategy);
-		shapeName = new ArrayList<>();
+		List<String> shapeName = new ArrayList<>();
 		shapeName.add("自由線");
 		shapeName.add("直線");
 		shapeName.add("長方形(塗りつぶし)");
@@ -494,7 +468,7 @@ public class GridCanvasController implements Initializable{
 				(ov, oldVal, newVal) -> strategy = nameToStrategy.get(newVal));
 	}
 
-	// TODO デバッグ用
+	// DEBUG
 	private void showArray(){
 		for(int x = 0; x < p.numPixelX; x++){
 			for(int y = 0; y < p.numPixelY; y++){
