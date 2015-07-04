@@ -1,115 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.canvas.*?>
 <?import de.jensd.fx.glyphs.fontawesome.*?>
-
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 <BorderPane fx:id="rootPane" prefHeight="600.0" prefWidth="523.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.GridCanvasController">
-   <top>
-      <VBox prefHeight="60.0" prefWidth="500.0">
-         <children>
-            <MenuBar prefHeight="25.0" BorderPane.alignment="CENTER">
-              <menus>
-                  <Menu mnemonicParsing="false" text="ファイル">
-                    <items>
-                      <MenuItem fx:id="menuExport" mnemonicParsing="false" onAction="#onMenuExportClicked" text="画像ファイルに出力" />
-                    </items>
-                  </Menu>
-                  <Menu mnemonicParsing="false" text="編集">
-                    <items>
-                      <MenuItem fx:id="menuUndo" mnemonicParsing="false" onAction="#onMenuUndoClicked" text="元に戻す" />
-                        <MenuItem fx:id="menuRedo" mnemonicParsing="false" onAction="#onMenuRedoClicked" text="やり直す" />
-                    </items>
-                  </Menu>
-                <Menu mnemonicParsing="false" text="設定">
+  <top>
+    <VBox prefHeight="60.0" prefWidth="500.0">
+      <children>
+        <MenuBar prefHeight="25.0" BorderPane.alignment="CENTER">
+          <menus>
+            <Menu mnemonicParsing="false" text="ファイル">
+              <items>
+                <MenuItem fx:id="menuExport" mnemonicParsing="false" onAction="#onMenuExportClicked" text="画像ファイルに出力"/>
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="編集">
+              <items>
+                <MenuItem fx:id="menuUndo" mnemonicParsing="false" onAction="#onMenuUndoClicked" text="元に戻す"/>
+                <MenuItem fx:id="menuRedo" mnemonicParsing="false" onAction="#onMenuRedoClicked" text="やり直す"/>
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="設定">
+              <items>
+                <Menu mnemonicParsing="false" text="描画方法">
                   <items>
-                        <Menu mnemonicParsing="false" text="描画方法">
-                          <items>
-                              <MenuItem fx:id="menuDrawtypeNormal" mnemonicParsing="false" onAction="#onMenuDrawtypeNormalClicked" text="通常" />
-                              <MenuItem fx:id="menuDrawtypeCur" mnemonicParsing="false" onAction="#onMenuDrawtypeCurClicked" text="始点の今の色で全て描画" />
-                            <MenuItem fx:id="menuDrawtypeNext" mnemonicParsing="false" onAction="#onMenuDrawtypeNextClicked" text="始点の次の色で全て描画" />
-                          </items>
-                        </Menu>
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true" text="グリッド表示" />
-                        <CheckMenuItem fx:id="menuAccentGrid" mnemonicParsing="false" onAction="#onMenuAccentGridClicked" text="強調グリッド表示" />
-                        <MenuItem mnemonicParsing="false" text="強調グリッドの設定" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked" text="グリッド/キャンバスのサイズ変更" />
+                    <MenuItem fx:id="menuDrawtypeNormal" mnemonicParsing="false" onAction="#onMenuDrawtypeNormalClicked"
+                              text="通常">
+                      <graphic>
+                        <ImageView fitHeight="12.0" fitWidth="12.0" pickOnBounds="true" preserveRatio="true">
+                          <image>
+                            <Image url="@res/normal.png"/>
+                          </image>
+                        </ImageView>
+                      </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuDrawtypeCur" mnemonicParsing="false" onAction="#onMenuDrawtypeCurClicked"
+                              text="始点の今の色で全て描画">
+                      <graphic>
+                        <ImageView fitHeight="12.0" fitWidth="12.0" pickOnBounds="true" preserveRatio="true">
+                          <image>
+                            <Image url="@res/cur.png"/>
+                          </image>
+                        </ImageView>
+                      </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuDrawtypeNext" mnemonicParsing="false" onAction="#onMenuDrawtypeNextClicked"
+                              text="始点の次の色で全て描画">
+                      <graphic>
+                        <ImageView fitHeight="12.0" fitWidth="12.0" pickOnBounds="true" preserveRatio="true">
+                          <image>
+                            <Image url="@res/next.png"/>
+                          </image>
+                        </ImageView>
+                      </graphic>
+                    </MenuItem>
                   </items>
                 </Menu>
-              </menus>
-            </MenuBar>
-            <ToolBar prefHeight="35.0">
-              <items>
-                  <Label text="図形:" />
-                  <ChoiceBox fx:id="choiceShape" prefWidth="150.0" />
-                  <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
-                     <padding>
-                        <Insets left="2.0" />
-                     </padding></Separator>
-                  <Button mnemonicParsing="false" onAction="#onMenuUndoClicked">
-                     <graphic>
-                        <FontAwesomeIconView glyphName="UNDO" size="14.0" />
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="元に戻す" />
-                     </tooltip>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#onMenuRedoClicked">
-                     <graphic>
-                        <FontAwesomeIconView glyphName="REPEAT" size="14.0" />
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="やり直す" />
-                     </tooltip>
-                  </Button>
-                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked">
-                  	<graphic>
-                  		<FontAwesomeIconView glyphName="TRASH_ALT" size="14.0" />
-                  	</graphic>
-                     <tooltip>
-                        <Tooltip text="すべて消去" />
-                     </tooltip>
-                  </Button>
-                  <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
-                     <padding>
-                        <Insets left="2.0" />
-                     </padding>
-                  </Separator>
-                  <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="29.0" style="-fx-background-size: 15; -fx-background-color: #00ACED;">
-                     <graphic>
-                        <FontAwesomeIconView fill="WHITE" glyphName="TWITTER" size="14.0" text="" />
-                     </graphic>
-                  </Button>
-                  <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Debug" />
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true"
+                               text="グリッド表示"/>
+                <CheckMenuItem fx:id="menuAccentGrid" mnemonicParsing="false" onAction="#onMenuAccentGridClicked"
+                               text="補助グリッド表示"/>
+                <MenuItem mnemonicParsing="false" onAction="#onMenuAccentGridSettingClicked" text="補助グリッドの設定"/>
+                <SeparatorMenuItem mnemonicParsing="false"/>
+                <MenuItem fx:id="menuResize" mnemonicParsing="false" onAction="#onMenuResizeClicked"
+                          text="キャンバスのサイズ変更"/>
               </items>
-            </ToolBar>
-         </children>
-      </VBox>
-   </top>
-   <center>
-      <ScrollPane prefHeight="400.0" prefWidth="400.0" BorderPane.alignment="CENTER">
-         <content>
-        	<Pane>
-        		<children>
-                  <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0" />
-                  <Canvas fx:id="previewLayer" height="100.0" mouseTransparent="true" width="100.0" />
-                  <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0" />
-                  <Canvas fx:id="accentGridLayer" height="100.0" mouseTransparent="true" opacity="0.8" visible="false" width="100.0" />
-                </children>
-            </Pane>
-        </content>
-      </ScrollPane>
-   </center>
-   <bottom>
-      <HBox prefHeight="17.0" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="描画方法:" />
-            <Label fx:id="labelDrawtype" prefHeight="17.0" prefWidth="130.0" />
-         </children>
-      </HBox>
-   </bottom>
+            </Menu>
+          </menus>
+        </MenuBar>
+        <ToolBar prefHeight="35.0">
+          <items>
+            <Label text="図形:"/>
+            <ComboBox fx:id="comboShape"/>
+            <Separator blendMode="SRC_ATOP" orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
+              <padding>
+                <Insets left="2.0"/>
+              </padding>
+            </Separator>
+            <Button mnemonicParsing="false" onAction="#onMenuUndoClicked" prefWidth="25.0">
+              <graphic>
+                <FontAwesomeIconView glyphName="UNDO" size="14.0"/>
+              </graphic>
+              <tooltip>
+                <Tooltip text="元に戻す"/>
+              </tooltip>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#onMenuRedoClicked">
+              <graphic>
+                <FontAwesomeIconView glyphName="REPEAT" size="14.0"/>
+              </graphic>
+              <tooltip>
+                <Tooltip text="やり直す"/>
+              </tooltip>
+            </Button>
+            <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onMenuClearClicked" prefWidth="28.0">
+              <graphic>
+                <FontAwesomeIconView glyphName="TRASH_ALT" size="14.0"/>
+              </graphic>
+              <tooltip>
+                <Tooltip text="すべて消去"/>
+              </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
+              <padding>
+                <Insets left="2.0"/>
+              </padding>
+            </Separator>
+            <FontAwesomeIconView glyphName="SEARCH_MINUS" size="14.0"/>
+            <Slider fx:id="sliderZoom" majorTickUnit="1.0" max="15.0" minorTickCount="0" prefHeight="14.0"
+                    prefWidth="80.0" snapToTicks="true">
+                     <tooltip>
+                       <Tooltip text="拡大縮小"/>
+                     </tooltip>
+            </Slider>
+            <FontAwesomeIconView glyphName="SEARCH_PLUS" size="14.0"/>
+            <Separator orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
+              <padding>
+                <Insets left="2.0"/>
+              </padding>
+            </Separator>
+            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="29.0" style="-fx-base: #55acee;">
+              <graphic>
+                <FontAwesomeIconView fill="WHITE" glyphName="TWITTER" size="16.0" text="" translateY="-0.5"/>
+              </graphic>
+            </Button>
+            <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Debug"/>
+          </items>
+        </ToolBar>
+      </children>
+    </VBox>
+  </top>
+  <center>
+    <ScrollPane prefHeight="400.0" prefWidth="400.0" BorderPane.alignment="CENTER">
+      <content>
+        <Pane>
+          <children>
+            <Canvas fx:id="canvas" height="100.0" onMouseDragged="#onDragged" onMouseMoved="#onMoved"
+                    onMousePressed="#onPressed" onMouseReleased="#onReleased" width="100.0"/>
+            <Canvas fx:id="previewLayer" height="100.0" mouseTransparent="true" width="100.0"/>
+            <Canvas fx:id="gridLayer" height="100.0" mouseTransparent="true" opacity="0.6" width="100.0"/>
+            <Canvas fx:id="accentGridLayer" height="100.0" mouseTransparent="true" opacity="0.8" visible="false"
+                    width="100.0"/>
+          </children>
+        </Pane>
+      </content>
+    </ScrollPane>
+  </center>
+  <bottom>
+    <HBox prefHeight="17.0" BorderPane.alignment="CENTER">
+      <children>
+        <Label fx:id="labelPos" text="[0, 0]"/>
+        <Label fx:id="labelOptionPos"/>
+        <Separator orientation="VERTICAL" prefHeight="200.0"/>
+        <Label text="拡大率:"/>
+        <Label fx:id="labelGridSize"/>
+        <Separator orientation="VERTICAL" prefHeight="200.0"/>
+        <Label text="描画方法:"/>
+        <Label fx:id="labelDrawtype" prefHeight="17.0"/>
+      </children>
+    </HBox>
+  </bottom>
 </BorderPane>

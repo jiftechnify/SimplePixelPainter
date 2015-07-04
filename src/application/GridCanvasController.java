@@ -7,7 +7,7 @@ import drawcommand.ClearAllCommand;
 import drawcommand.Command;
 import drawcommand.DrawtypeChangeCommand;
 import drawcommand.RedrawCommand;
-import drawstrategy.*;
+import drawstrategy.DrawStrategy;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,9 +17,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -30,14 +29,18 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ResourceBundle;
+import java.util.Stack;
 
 public class GridCanvasController implements Initializable{
+	private static GridCanvasController instance;
+
 	@FXML private BorderPane rootPane;
 	@FXML private Canvas canvas;
 	@FXML private Canvas previewLayer;
@@ -52,8 +55,18 @@ public class GridCanvasController implements Initializable{
 	@FXML private CheckMenuItem menuGrid;
 	@FXML private CheckMenuItem menuAccentGrid;
 
-	@FXML private ChoiceBox<String> choiceShape;
+	@FXML
+	private Slider sliderZoom;
+
+	@FXML
+	private ComboBox<Shapes> comboShape;
 	@FXML private Label labelDrawtype;
+	@FXML
+	private Label labelGridSize;
+	@FXML
+	private Label labelPos;
+	@FXML
+	private Label labelOptionPos;
 
 	private GridCanvasProperty p;
 
@@ -78,7 +91,6 @@ public class GridCanvasController implements Initializable{
 			return desc;
 		}
 	}
-	private final Map<String, DrawStrategy> nameToStrategy = new HashMap<>();
 
 	private Drawtype drawtype;
 	private DrawStrategy strategy;
@@ -86,11 +98,17 @@ public class GridCanvasController implements Initializable{
 	private Stack<Command> history = new Stack<>();
 	private Stack<Command> undoHistory = new Stack<>();
 
-	private int gridAccentMergin = 8;
+	private AccentGridProperty accentGridP;
 	private boolean isAccentGridVisible = false;
 	private static final Color GRID_COLOR = new Color(0.5, 0.5, 0.5, 1.0);
-	private static final Color GRID_COLOR_ACCENT = Color.RED;
 
+	private int[] gridSizeArray = {1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 38, 44, 50};
+	private int gridSizeIndex;
+	private static final int DEFALUT_GRID_SIZE_INDEX = 8;
+
+	static GridCanvasController getInstance() {
+		return instance;
+	}
 	/*
 	 * 描画
 	 * Canvas上でのマウス操作に応じて、選択中の図形のDrawStrategyの対応するメソッドを呼ぶ。
@@ -113,6 +131,7 @@ public class GridCanvasController implements Initializable{
 	}
 	@FXML
 	private void onReleased(MouseEvent e){
+		showOptionPos("");
 		clearPreview();
 		Point pos = transformCoordinate(e.getX(), e.getY());
 		if(pos != null)
@@ -123,13 +142,20 @@ public class GridCanvasController implements Initializable{
 		Point pos = transformCoordinate(e.getX(), e.getY());
 		if(pos == null){
 			clearPreview();
-			//prevPos = Point.DUMMY_POINT;
+			prevPos = Point.DUMMY_POINT;
 		}
 		else if(!pos.equals(prevPos)){
 			clearPreview();
 			strategy.onDragged(pos);
 			prevPos = pos;
 		}
+	}
+
+	@FXML
+	private void onMoved(MouseEvent e) {
+		Point pos = transformCoordinate(e.getX(), e.getY());
+		if (pos != null)
+			showPosition(pos);
 	}
 
 	// 画面の座標をグリッドの座標に変換 画面外ならnullを返す
@@ -140,6 +166,16 @@ public class GridCanvasController implements Initializable{
 			return null;
 		}
 		return new Point(gridX, gridY);
+	}
+
+	// マウスポインタのある座標を表示
+	private void showPosition(Point pos) {
+		labelPos.setText("[" + pos.x + ", " + pos.y + "]");
+	}
+
+	// 描画しようとしている図形に合わせたオプション座標情報を表示
+	public void showOptionPos(String optPos) {
+		labelOptionPos.setText(optPos);
 	}
 	// 描画処理
 	public void drawPixel(int x, int y, PixelState startPosPixel, boolean clear){
@@ -191,7 +227,7 @@ public class GridCanvasController implements Initializable{
 		previewGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 	}
 	// プレビューの消去
-	public void clearPreview(){
+	private void clearPreview() {
 		previewGraphics.clearRect(0.0, 0.0, previewLayer.getWidth(), previewLayer.getHeight());
 	}
 	// 全消去
@@ -201,12 +237,11 @@ public class GridCanvasController implements Initializable{
 		canvasGraphics.fillRect(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
 	}
 
-	/**
+	/*
 	 * Undo/Redo
 	 * 描画、全消去、描画方法変更の度にその操作を表すCommandを生成し、historyに蓄積する。
 	 * Undo時はhistoryから1つpopしてRedo用のundoHistoryにpushし、再描画
 	 * Redo時はundoHistoryから1つpopしてhistoryにpushし、再描画
-	 *
 	 */
 	@FXML
 	private void onMenuUndoClicked(ActionEvent e){
@@ -227,13 +262,27 @@ public class GridCanvasController implements Initializable{
 		history.push(command);
 	}
 
-	/**
+	/*
+	 * 拡大縮小
+	 */
+	private void zoomCanvas(int zoomLevel) {
+		int newGridSize = gridSizeArray[zoomLevel];
+		p = new GridCanvasProperty(newGridSize, p.numPixelX, p.numPixelY);
+		setCanvasSize();
+		clearAll();
+		drawGrid();
+		for (Command c : history)
+			c.execute();
+		labelGridSize.setText(String.valueOf(newGridSize));
+	}
+
+	/*
 	 * メニューまわりの処理
 	 * いずれは別のクラスに移したい
 	 */
 	// 画像出力
 	@FXML
-	private void onMenuExportClicked(ActionEvent e){
+	private void onMenuExportClicked() {
 		exportCanvas = new Canvas();
 		exportCanvas.setWidth(p.numPixelX);
 		exportCanvas.setHeight(p.numPixelY);
@@ -282,9 +331,10 @@ public class GridCanvasController implements Initializable{
 			menuAccentGrid.setSelected(isAccentGridVisible);
 		}
 	}
-	// 強調グリッド表示切り替え
+
+	// 補助グリッド表示切り替え
 	@FXML
-	private void onMenuAccentGridClicked(ActionEvent e){
+	private void onMenuAccentGridClicked() {
 		if(gridLayer.isVisible()){
 			if(accentGridLayer.isVisible()){
 				isAccentGridVisible = false;
@@ -298,21 +348,52 @@ public class GridCanvasController implements Initializable{
 			}
 		}
 	}
+
+	// 補助グリッド設定
+	@FXML
+	private void onMenuAccentGridSettingClicked() throws IOException {
+		showAccentGridSetting();
+	}
+
+	private void showAccentGridSetting() throws IOException {
+		FXMLLoader loader = new FXMLLoader(this.getClass().getResource("AccentGridSettingWindow.fxml"));
+		loader.load();
+		AccentGridSettingWindowController settingController = loader.getController();
+		settingController.receiveProperty(accentGridP);
+
+		Parent root = loader.getRoot();
+		Stage stage = new Stage(StageStyle.UTILITY);
+		stage.setScene(new Scene(root));
+		stage.initOwner(rootPane.getScene().getWindow());
+		stage.initModality(Modality.WINDOW_MODAL);
+		stage.setTitle("");
+		stage.setResizable(false);
+
+		stage.showAndWait();
+
+		if (settingController.okPressed()) {
+			accentGridP = settingController.getNewProperty();
+			drawGrid();
+		} else {
+			System.out.println("cancel");
+		}
+	}
+
 	// 描画方法
 	@FXML
-	private void onMenuDrawtypeNormalClicked(ActionEvent e){
+	private void onMenuDrawtypeNormalClicked() {
 		Command c = new DrawtypeChangeCommand(this, Drawtype.NORMAL);
 		pushNewHistory(c);
 		c.execute();
 	}
 	@FXML
-	private void onMenuDrawtypeCurClicked(ActionEvent e){
+	private void onMenuDrawtypeCurClicked() {
 		Command c = new DrawtypeChangeCommand(this, Drawtype.FILL_WITH_CURRENT_COLOR_AT_START_POS);
 		pushNewHistory(c);
 		c.execute();
 	}
 	@FXML
-	private void onMenuDrawtypeNextClicked(ActionEvent e){
+	private void onMenuDrawtypeNextClicked() {
 		Command c = new DrawtypeChangeCommand(this, Drawtype.FILL_WITH_NEXT_COLOR_AT_START_POS);
 		pushNewHistory(c);
 		c.execute();
@@ -322,11 +403,11 @@ public class GridCanvasController implements Initializable{
 		labelDrawtype.setText(drawtype.toString());
 	}
 
-	/**
+	/*
 	 * キャンバスのリサイズ
 	 */
 	@FXML
-	private void onMenuResizeClicked(ActionEvent e) throws Exception{
+	private void onMenuResizeClicked() throws Exception {
 		showResizeSetting();
 	}
 
@@ -341,7 +422,7 @@ public class GridCanvasController implements Initializable{
 		stage.setScene(new Scene(root));
 		stage.initOwner(rootPane.getScene().getWindow());
 		stage.initModality(Modality.WINDOW_MODAL);
-		stage.setTitle("設定");
+		stage.setTitle("");
 		stage.setResizable(false);
 
 		stage.showAndWait();
@@ -395,11 +476,13 @@ public class GridCanvasController implements Initializable{
 	// 初期化
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		instance = this;
 		// 描画関係の初期化
-		initComboShape();
-		strategy = nameToStrategy.get("自由線");
+		initChoiceShape();
+		strategy = Shapes.nameToStrategy("自由線");
 		setDrawType(Drawtype.NORMAL);
 		pushNewHistory(new DrawtypeChangeCommand(this, Drawtype.NORMAL));
+		labelOptionPos.setTextFill(Color.RED);
 
 		// キャンバスとグリッドのレイヤーのGraphicsContextを得る
 		canvasGraphics = canvas.getGraphicsContext2D();
@@ -408,7 +491,16 @@ public class GridCanvasController implements Initializable{
 		accentGraphics = accentGridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
-		p = new GridCanvasProperty(12, 24, 24);
+		gridSizeIndex = DEFALUT_GRID_SIZE_INDEX;
+		p = new GridCanvasProperty(gridSizeArray[gridSizeIndex], 24, 24);
+		accentGridP = new AccentGridProperty(8, 8, Color.hsb(0.0, 1.0, 0.9));
+		labelGridSize.setText(String.valueOf(gridSizeArray[gridSizeIndex]));
+		sliderZoom.setValue(gridSizeIndex);
+		sliderZoom.valueProperty().addListener(
+				(observable, oldValue, newValue) -> {
+					zoomCanvas(newValue.intValue());
+				}
+		);
 
 		// 各ピクセルの内容を管理するModelを生成
 		pixelArray = new GridCanvasModel(p.numPixelX, p.numPixelY);
@@ -437,35 +529,61 @@ public class GridCanvasController implements Initializable{
 		accentGraphics.clearRect(0.0, 0.0, accentGridLayer.getWidth(), accentGridLayer.getHeight());
 		if(p.gridSize > 2 && p.gridSize > 2){
 			gridGraphics.setFill(GRID_COLOR);
-			accentGraphics.setFill(GRID_COLOR_ACCENT);
+			accentGraphics.setFill(accentGridP.color);
 			for(int x = 0; x <= p.numPixelX; x++){
 				gridGraphics.fillRect(p.gridSize * x, 0.0, 1.0, gridLayer.getHeight());
-				if(x != 0 && x % gridAccentMergin == 0)
+				if (x != 0 && x % accentGridP.marginX == 0)
 					accentGraphics.fillRect(p.gridSize * x, 0.0, 1.0, accentGridLayer.getHeight());
 			}
 			for(int y = 0; y <= p.numPixelY; y++){
 				gridGraphics.fillRect(0.0, p.gridSize * y, gridLayer.getWidth(), 1.0);
-				if(y != 0 && y % gridAccentMergin == 0)
+				if (y != 0 && y % accentGridP.marginY == 0)
 					accentGraphics.fillRect(0.0, p.gridSize * y, accentGridLayer.getWidth(), 1.0);
 			}
 		}
 	}
-	private void initComboShape(){
+
+	private void initChoiceShape() {
+		/*
 		nameToStrategy.put("自由線", new FreelineDrawStrategy(this));
 		nameToStrategy.put("直線", new LineDrawStrategy(this));
 		nameToStrategy.put("長方形(塗りつぶし)", new FilledRectDrawStrategy(this));
 		nameToStrategy.put("長方形(塗りつぶしなし)", new EmptyRectDrawStrategy(this));
 		Collections.unmodifiableMap(nameToStrategy);
-		List<String> shapeName = new ArrayList<>();
-		shapeName.add("自由線");
-		shapeName.add("直線");
-		shapeName.add("長方形(塗りつぶし)");
-		shapeName.add("長方形(塗りつぶしなし)");
-		Collections.unmodifiableList(shapeName);
-		choiceShape.getItems().addAll(shapeName);
-		choiceShape.getSelectionModel().selectFirst();
-		choiceShape.getSelectionModel().selectedItemProperty().addListener(
-				(ov, oldVal, newVal) -> strategy = nameToStrategy.get(newVal));
+		*/
+		comboShape.getItems().addAll(Shapes.values());
+		comboShape.setCellFactory(new Callback<ListView<Shapes>, ListCell<Shapes>>() {
+			@Override
+			public ListCell<Shapes> call(ListView<Shapes> param) {
+				return new ShapesListCell();
+			}
+		});
+		comboShape.setButtonCell(new ShapesListCell());
+		comboShape.getSelectionModel().selectFirst();
+		comboShape.getSelectionModel().selectedItemProperty().addListener(
+				(ov, oldVal, newVal) -> strategy = newVal.getStrategy());
+	}
+
+	private static class ShapesListCell extends ListCell<Shapes> {
+		private final ImageView view;
+
+		ShapesListCell() {
+			view = new ImageView();
+		}
+
+		@Override
+		protected void updateItem(Shapes item, boolean empty) {
+			super.updateItem(item, empty);
+
+			if (item == null || empty) {
+				setGraphic(null);
+				setText(null);
+			} else {
+				view.setImage(item.getIcon());
+				setGraphic(view);
+				setText(item.getName());
+			}
+		}
 	}
 
 	// DEBUG
@@ -476,6 +594,7 @@ public class GridCanvasController implements Initializable{
 			}
 			System.out.println();
 		}
+
 	}
 
 	@FXML

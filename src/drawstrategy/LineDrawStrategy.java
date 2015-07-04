@@ -31,6 +31,7 @@ public class LineDrawStrategy implements DrawStrategy {
 
 	@Override
 	public void onDragged(Point pos) {
+		canvasController.showOptionPos(" -> [" + pos.x + ", " + pos.y + "]");
 		int nextX = startPos.x;
 		int nextY = startPos.y;
 		int deltaX = pos.x - startPos.x;

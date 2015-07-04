@@ -35,6 +35,7 @@ public class FilledRectDrawStrategy implements DrawStrategy {
 		int x, y;
 		Point lt = new Point(Math.min(startPos.x, pos.x), Math.min(startPos.y, pos.y));
 		Point rb = new Point(Math.max(startPos.x, pos.x), Math.max(startPos.y, pos.y));
+		canvasController.showOptionPos(" -> " + (rb.x - lt.x + 1) + "*" + (rb.y - lt.y + 1));
 		for(x = lt.x, y = lt.y; x <= rb.x; x++)
 			canvasController.drawPreview(x, y, startPosPixel, clear);
 

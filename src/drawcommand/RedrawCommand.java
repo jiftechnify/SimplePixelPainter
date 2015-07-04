@@ -11,7 +11,7 @@ public class RedrawCommand implements Command {
 	public RedrawCommand(int numPixX, int numPixY, GridCanvasController canvasController){
 		this.canvasController = canvasController;
 		pixelData = new Table<>(numPixX, numPixY, PixelState.WHITE);
-		pixelData.initiaizeWith(PixelState.WHITE);
+		pixelData.initializeWith(PixelState.WHITE);
 	}
 	public void set(int x, int y, PixelState pixel){
 		pixelData.setAt(x, y, pixel);

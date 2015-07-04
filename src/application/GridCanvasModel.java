@@ -7,8 +7,8 @@ public class GridCanvasModel {
 	private Table<PixelState> pixelData;
 
 	public GridCanvasModel(int numPixX, int numPixY){
-		pixelData = new Table<>(numPixX, numPixX, PixelState.WHITE);
-		pixelData.initiaizeWith(PixelState.WHITE);
+		pixelData = new Table<>(numPixX, numPixY, PixelState.WHITE);
+		pixelData.initializeWith(PixelState.WHITE);
 	}
 
 	public void setAt(int x, int y, PixelState pixel){
@@ -24,7 +24,7 @@ public class GridCanvasModel {
 	}
 
 	public void clearAll(){
-		pixelData.initiaizeWith(PixelState.WHITE);
+		pixelData.initializeWith(PixelState.WHITE);
 	}
 
 	public void resize(int newX, int newY){

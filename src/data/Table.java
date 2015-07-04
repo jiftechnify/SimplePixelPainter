@@ -20,7 +20,8 @@ public class Table<E> {
 				row.add(initData);
 		}
 	}
-	public void initiaizeWith(E initData){
+
+	public void initializeWith(E initData) {
 		for(int x = 0; x < numX; x++){
 			for(int y = 0; y < numY; y++)
 				setAt(x, y, initData);
