@@ -55,18 +55,14 @@ public class GridCanvasController implements Initializable{
 	@FXML private CheckMenuItem menuGrid;
 	@FXML private CheckMenuItem menuAccentGrid;
 
-	@FXML
-	private Slider sliderZoom;
+	@FXML private Slider sliderZoom;
 
-	@FXML
-	private ComboBox<Shapes> comboShape;
+	@FXML private ComboBox<Shapes> comboShape;
+	@FXML private ToggleButton tBtnSelect;
 	@FXML private Label labelDrawtype;
-	@FXML
-	private Label labelGridSize;
-	@FXML
-	private Label labelPos;
-	@FXML
-	private Label labelOptionPos;
+	@FXML private Label labelGridSize;
+	@FXML private Label labelPos;
+	@FXML private Label labelOptionPos;
 
 	private GridCanvasProperty p;
 
@@ -104,7 +100,9 @@ public class GridCanvasController implements Initializable{
 
 	private int[] gridSizeArray = {1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 38, 44, 50};
 	private int gridSizeIndex;
-	private static final int DEFALUT_GRID_SIZE_INDEX = 8;
+	private static final int DEFAULT_GRID_SIZE_INDEX = 8;
+
+	private boolean nowSelecting = false;
 
 	static GridCanvasController getInstance() {
 		return instance;
@@ -119,112 +117,131 @@ public class GridCanvasController implements Initializable{
 	@FXML
 	private void onPressed(MouseEvent e){
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		if(pos != null){
-			PixelState startPosPixel = null;
-			boolean clear = false;
-			if(e.getButton() == MouseButton.SECONDARY)
-				clear = true;
-			else
-				startPosPixel = pixelArray.getAt(pos.x, pos.y);
-			strategy.onPressed(pos, startPosPixel, clear);
-		}
+		if(nowSelecting)
+			onPressedSelect(pos);
+		else
+			onPressedDraw(pos, e.getButton());
+	}
+	private void onPressedSelect(Point pos){
+
+	}
+	private void onPressedDraw(Point pos, MouseButton btn){
+		PixelState startPosPixel = null;
+		boolean clear = false;
+		if(btn == MouseButton.SECONDARY)
+			clear = true;
+		else
+			startPosPixel = pixelArray.getAt(pos.x, pos.y);
+		strategy.onPressed(pos, startPosPixel, clear);
 	}
 	@FXML
 	private void onReleased(MouseEvent e){
+		Point pos = transformCoordinate(e.getX(), e.getY());
+		if(nowSelecting)
+			onReleasedSelect(pos);
+		else
+			onReleasedDraw(pos);
+	}
+	private void onReleasedDraw(Point pos){
 		showOptionPos("");
 		clearPreview();
-		Point pos = transformCoordinate(e.getX(), e.getY());
-		if(pos != null)
-			strategy.onReleased(pos);
+		strategy.onReleased(pos);
+	}
+	private void onReleasedSelect(Point pos){
+
 	}
 	@FXML
 	private void onDragged(MouseEvent e){
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		if(pos == null){
+		if(!pos.equals(prevPos)){
 			clearPreview();
-			prevPos = Point.DUMMY_POINT;
-		}
-		else if(!pos.equals(prevPos)){
-			clearPreview();
-			strategy.onDragged(pos);
+			if(nowSelecting)
+				onDraggedSelect(pos);
+			else
+				onDraggedDraw(pos);
 			prevPos = pos;
 		}
 	}
+	private void onDraggedDraw(Point pos){
+		strategy.onDragged(pos);
+	}
+	private void onDraggedSelect(Point pos){
 
+	}
 	@FXML
 	private void onMoved(MouseEvent e) {
 		Point pos = transformCoordinate(e.getX(), e.getY());
-		if (pos != null)
-			showPosition(pos);
+		showPosition(pos);
 	}
-
 	// 画面の座標をグリッドの座標に変換 画面外ならnullを返す
 	private Point transformCoordinate(double x, double y){
 		int gridX = (int)(x / p.gridSize);
 		int gridY = (int)(y / p.gridSize);
-		if(gridX < 0 || gridX >= p.numPixelX || gridY < 0 || gridY >= p.numPixelY){
-			return null;
-		}
+
 		return new Point(gridX, gridY);
 	}
-
 	// マウスポインタのある座標を表示
 	private void showPosition(Point pos) {
 		labelPos.setText("[" + pos.x + ", " + pos.y + "]");
 	}
-
 	// 描画しようとしている図形に合わせたオプション座標情報を表示
 	public void showOptionPos(String optPos) {
 		labelOptionPos.setText(optPos);
 	}
+	private boolean isOnCanvas(int x, int y){
+		return (0 <= x && x < p.numPixelX) && (0 <= y && y < p.numPixelY);
+	}
 	// 描画処理
 	public void drawPixel(int x, int y, PixelState startPosPixel, boolean clear){
-		PixelState pixel = PixelState.WHITE;
-		if(clear){
-			pixelArray.setAt(x, y, pixel = PixelState.WHITE);
-		}
-		else{
-			switch(drawtype){
-			case NORMAL:
-				pixelArray.setAt(x, y, pixel = PixelState.nextState(pixelArray.getAt(x, y)));
-				break;
-			case FILL_WITH_CURRENT_COLOR_AT_START_POS:
-				if(startPosPixel == PixelState.WHITE)
-					startPosPixel = PixelState.BLACK;
-				pixelArray.setAt(x, y, pixel = startPosPixel);
-				break;
-			case FILL_WITH_NEXT_COLOR_AT_START_POS:
-				pixelArray.setAt(x, y, pixel = PixelState.nextState(startPosPixel));
-				break;
+		if(isOnCanvas(x, y)) {
+			PixelState pixel = PixelState.WHITE;
+			if (clear) {
+				pixelArray.setAt(x, y, pixel = PixelState.WHITE);
+			} else {
+				switch (drawtype) {
+					case NORMAL:
+						pixelArray.setAt(x, y, pixel = PixelState.nextState(pixelArray.getAt(x, y)));
+						break;
+					case FILL_WITH_CURRENT_COLOR_AT_START_POS:
+						if (startPosPixel == PixelState.WHITE)
+							startPosPixel = PixelState.BLACK;
+						pixelArray.setAt(x, y, pixel = startPosPixel);
+						break;
+					case FILL_WITH_NEXT_COLOR_AT_START_POS:
+						pixelArray.setAt(x, y, pixel = PixelState.nextState(startPosPixel));
+						break;
+				}
 			}
+			canvasGraphics.setFill(pixel.color());
+			canvasGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 		}
-		canvasGraphics.setFill(pixel.color());
-		canvasGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 	}
 	// プレビュー描画
 	public void drawPreview(int x, int y, PixelState startPosPixel, boolean clear){
-		if(clear)
-			if(pixelArray.getAt(x, y).color().equals(Color.WHITE))
-				previewGraphics.setFill(Color.BLACK);
-			else
-				previewGraphics.setFill(Color.WHITE);
-		else{
-			switch(drawtype){
-			case NORMAL:
-				previewGraphics.setFill(PixelState.nextState(pixelArray.getAt(x, y)).color());
-				break;
-			case FILL_WITH_CURRENT_COLOR_AT_START_POS:
-				Color color = startPosPixel.color();
-				if(color.equals(pixelArray.getAt(x, y).color()))
-					previewGraphics.setFill(color.invert().darker());
+		if(isOnCanvas(x, y)) {
+			if (clear)
+				if (pixelArray.getAt(x, y).color().equals(Color.WHITE))
+					previewGraphics.setFill(Color.BLACK);
 				else
-					previewGraphics.setFill(color);
-				break;
-			case FILL_WITH_NEXT_COLOR_AT_START_POS:
-				previewGraphics.setFill(PixelState.nextState(startPosPixel).color());
+					previewGraphics.setFill(Color.WHITE);
+			else {
+				switch (drawtype) {
+					case NORMAL:
+						previewGraphics.setFill(PixelState.nextState(pixelArray.getAt(x, y)).color());
+						break;
+					case FILL_WITH_CURRENT_COLOR_AT_START_POS:
+						Color color = startPosPixel.color();
+						if (color.equals(pixelArray.getAt(x, y).color()))
+							previewGraphics.setFill(color.invert().darker());
+						else
+							previewGraphics.setFill(color);
+						break;
+					case FILL_WITH_NEXT_COLOR_AT_START_POS:
+						previewGraphics.setFill(PixelState.nextState(startPosPixel).color());
+				}
 			}
+			previewGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 		}
-		previewGraphics.fillRect(x * p.gridSize, y * p.gridSize, p.gridSize, p.gridSize);
 	}
 	// プレビューの消去
 	private void clearPreview() {
@@ -247,15 +264,13 @@ public class GridCanvasController implements Initializable{
 	private void onMenuUndoClicked(ActionEvent e){
 		undoHistory.push(history.pop());
 		clearAll();
-		for(Command command: history)
-			command.execute();
+		history.forEach(Command::execute);
 	}
 	@FXML
 	private void onMenuRedoClicked(ActionEvent e){
 		history.push(undoHistory.pop());
 		clearAll();
-		for(Command command: history)
-			command.execute();
+		history.forEach(Command::execute);
 	}
 	public void pushNewHistory(Command command) {
 		undoHistory.removeAllElements();
@@ -491,7 +506,7 @@ public class GridCanvasController implements Initializable{
 		accentGraphics = accentGridLayer.getGraphicsContext2D();
 
 		// グリッド/キャンバスサイズ設定
-		gridSizeIndex = DEFALUT_GRID_SIZE_INDEX;
+		gridSizeIndex = DEFAULT_GRID_SIZE_INDEX;
 		p = new GridCanvasProperty(gridSizeArray[gridSizeIndex], 24, 24);
 		accentGridP = new AccentGridProperty(8, 8, Color.hsb(0.0, 1.0, 0.9));
 		labelGridSize.setText(String.valueOf(gridSizeArray[gridSizeIndex]));
@@ -544,20 +559,8 @@ public class GridCanvasController implements Initializable{
 	}
 
 	private void initChoiceShape() {
-		/*
-		nameToStrategy.put("自由線", new FreelineDrawStrategy(this));
-		nameToStrategy.put("直線", new LineDrawStrategy(this));
-		nameToStrategy.put("長方形(塗りつぶし)", new FilledRectDrawStrategy(this));
-		nameToStrategy.put("長方形(塗りつぶしなし)", new EmptyRectDrawStrategy(this));
-		Collections.unmodifiableMap(nameToStrategy);
-		*/
 		comboShape.getItems().addAll(Shapes.values());
-		comboShape.setCellFactory(new Callback<ListView<Shapes>, ListCell<Shapes>>() {
-			@Override
-			public ListCell<Shapes> call(ListView<Shapes> param) {
-				return new ShapesListCell();
-			}
-		});
+		comboShape.setCellFactory(param -> new ShapesListCell());
 		comboShape.setButtonCell(new ShapesListCell());
 		comboShape.getSelectionModel().selectFirst();
 		comboShape.getSelectionModel().selectedItemProperty().addListener(
