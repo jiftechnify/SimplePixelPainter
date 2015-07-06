@@ -59,6 +59,8 @@
                     </MenuItem>
                   </items>
                 </Menu>
+                <CheckMenuItem fx:id="menuWhite" onAction="#onMenuWhiteClicked" mnemonicParsing="false"
+                               text="白を透過色にする"/>
                 <SeparatorMenuItem mnemonicParsing="false"/>
                 <CheckMenuItem fx:id="menuGrid" mnemonicParsing="false" onAction="#onMenuGridClicked" selected="true"
                                text="グリッド表示"/>
@@ -76,6 +78,14 @@
           <items>
             <Label text="図形:"/>
             <ComboBox fx:id="comboShape"/>
+            <ToggleButton fx:id="tBtnSelect" mnemonicParsing="false">
+              <graphic>
+                <FontAwesomeIconView glyphName="CROP" glyphStyle="" size="14.0"/>
+              </graphic>
+              <tooltip>
+                <Tooltip text="範囲選択"/>
+              </tooltip>
+            </ToggleButton>
             <Separator blendMode="SRC_ATOP" orientation="VERTICAL" prefHeight="20.0" prefWidth="6.0">
               <padding>
                 <Insets left="2.0"/>
@@ -123,12 +133,14 @@
                 <Insets left="2.0"/>
               </padding>
             </Separator>
+            <!-- twitterボタンとdebug用ボタン
             <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="29.0" style="-fx-base: #55acee;">
               <graphic>
-                <FontAwesomeIconView fill="WHITE" glyphName="TWITTER" size="16.0" text="" translateY="-0.5"/>
+                <FontAwesomeIconView fill="WHITE" glyphName="TWITTER" size="16.0" text="" translateY="-0.5" />
               </graphic>
             </Button>
-            <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Debug"/>
+            <Button fx:id="btnShow" mnemonicParsing="false" onAction="#onbtnShow" text="Debug" />
+            -->
           </items>
         </ToolBar>
       </children>

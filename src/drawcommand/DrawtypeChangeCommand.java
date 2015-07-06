@@ -7,7 +7,7 @@ public class DrawtypeChangeCommand implements Command {
 	private GridCanvasController canvasController;
 	private GridCanvasController.Drawtype drawType;
 
-	public DrawtypeChangeCommand(GridCanvasController canvasController, Drawtype drawType){
+	public DrawtypeChangeCommand(Drawtype drawType, GridCanvasController canvasController) {
 		this.canvasController = canvasController;
 		this.drawType = drawType;
 	}
