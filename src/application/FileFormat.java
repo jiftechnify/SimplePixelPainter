@@ -4,9 +4,9 @@ package application;
  * Created by jiftech on 2015/07/06.
  */
 public enum FileFormat {
-    BMP("BMPファイル", "bmp"),
     PNG("PNGファイル", "png"),
     GIF("GIFファイル", "gif"),
+    BMP("BMPファイル", "bmp"),
     JPEG("JPEGファイル", "jpg"),;
 
     private String description;

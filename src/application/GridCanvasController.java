@@ -99,6 +99,7 @@ public class GridCanvasController implements Initializable{
 	private int[] gridSizeArray = {1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 38, 44, 50};
 	private int gridSizeIndex;
 	private static final int DEFAULT_GRID_SIZE_INDEX = 8;
+	private static final int CANVAS_PIXELS_LIMIT = 409600;
 
 	private boolean nowSelecting = false;
 	private boolean nowDraggingOnSelect = false;
@@ -432,6 +433,7 @@ public class GridCanvasController implements Initializable{
 	 */
 	private void zoomCanvas(int zoomLevel) {
 		int newGridSize = gridSizeArray[zoomLevel];
+		//if(p.numPixelX * p.numPixelY * newGridSize * newGridSize < CANVAS_PIXELS_LIMIT) {
 		p = new GridCanvasProperty(newGridSize, p.numPixelX, p.numPixelY);
 		setCanvasSize();
 		clearAll();
@@ -439,6 +441,7 @@ public class GridCanvasController implements Initializable{
 		for (Command c : history)
 			c.execute();
 		labelGridSize.setText(String.valueOf(newGridSize));
+		//}
 	}
 
 	/*

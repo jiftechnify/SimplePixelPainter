@@ -46,7 +46,7 @@
       </rowConstraints>
       <children>
         <Label text="拡大率:"/>
-        <TextField fx:id="textZoomLevel" GridPane.rowIndex="1"/>
+        <TextField fx:id="textZoomLevel" alignment="CENTER_RIGHT" GridPane.rowIndex="1"/>
         <Label text="出力画像サイズ:" GridPane.columnIndex="2"/>
         <Label fx:id="labelSize" alignment="CENTER_RIGHT" GridPane.columnIndex="2" GridPane.halignment="RIGHT"
                GridPane.rowIndex="1" GridPane.valignment="CENTER"/>

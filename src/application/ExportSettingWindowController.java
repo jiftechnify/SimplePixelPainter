@@ -45,6 +45,9 @@ public class ExportSettingWindowController implements Initializable {
                         labelSize.setText("");
                         return;
                     }
+                    if (zoomLevel < 1)
+                        return;
+
                     labelSize.setText(
                             property.numPixelX * zoomLevel + "*" + property.numPixelY * zoomLevel);
                 }
@@ -63,6 +66,11 @@ public class ExportSettingWindowController implements Initializable {
             showAlert();
             return;
         }
+        if (selectedZoomLevel < 1) {
+            showAlert();
+            return;
+        }
+
         selectedFormat = choiceFormat.getValue();
         getWindow().hide();
     }
