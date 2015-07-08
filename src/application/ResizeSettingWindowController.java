@@ -9,6 +9,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
+import org.controlsfx.validation.Severity;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -18,8 +21,9 @@ public class ResizeSettingWindowController implements Initializable{
 	@FXML private Button btnOK;
 	@FXML private TextField txtNumPxX;
 	@FXML private TextField txtNumPxY;
-	@FXML
-	private CheckBox chkAspectFix;
+	@FXML private CheckBox chkAspectFix;
+
+	private ValidationSupport vs = new ValidationSupport();
 
 	private GridCanvasProperty initProperty;
 	private GridCanvasProperty newProperty;
@@ -28,8 +32,16 @@ public class ResizeSettingWindowController implements Initializable{
 	private boolean isAspectFix = false;
 	private double ratio; // = x / y , x = y * ratio, y = x / ratio
 
+	private static final String VALIDATE_MESSAGE = "1-100の整数を入力してください";
+	private static final String VALIDATE_PATTERN = "[1-9][0-9]?|100";
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		vs.registerValidator(txtNumPxX, false,
+				Validator.createRegexValidator(VALIDATE_MESSAGE, VALIDATE_PATTERN, Severity.ERROR));
+		vs.registerValidator(txtNumPxY, false,
+				Validator.createRegexValidator(VALIDATE_MESSAGE, VALIDATE_PATTERN, Severity.ERROR));
+
 		chkAspectFix.selectedProperty().addListener(
 				(observable, oldValue, newValue) -> {
 					isAspectFix = newValue;
@@ -61,22 +73,15 @@ public class ResizeSettingWindowController implements Initializable{
 
 	@FXML
 	private void onBtnOKClicked(ActionEvent e){
-		int numPxX, numPxY;
-		try{
-			numPxX = Integer.valueOf(txtNumPxX.getText());
-			numPxY = Integer.valueOf(txtNumPxY.getText());
+		if(txtNumPxX.getText().matches(VALIDATE_PATTERN) && txtNumPxY.getText().matches(VALIDATE_PATTERN)) {
+			int numPxX = Integer.valueOf(txtNumPxX.getText());
+			int numPxY = Integer.valueOf(txtNumPxY.getText());
+			newProperty = new GridCanvasProperty(initProperty.gridSize, numPxX, numPxY);
+			okPressed = true;
+			getWindow().hide();
 		}
-		catch(NumberFormatException ex){
+		else
 			showAlert();
-			return;
-		}
-		if (numPxX <= 0 || numPxY <= 0) {
-			showAlert();
-			return;
-		}
-		newProperty = new GridCanvasProperty(initProperty.gridSize, numPxX, numPxY);
-		okPressed = true;
-		getWindow().hide();
 	}
 
 	private void showAlert(){
@@ -84,7 +89,7 @@ public class ResizeSettingWindowController implements Initializable{
 		Alert alert = new Alert(AlertType.WARNING);
 		alert.setTitle("");
 		alert.getDialogPane().setHeaderText("警告");
-		alert.getDialogPane().setContentText("1以上の整数を入力してください。");
+		alert.getDialogPane().setContentText(VALIDATE_MESSAGE);
 		alert.show();
 	}
 	@FXML

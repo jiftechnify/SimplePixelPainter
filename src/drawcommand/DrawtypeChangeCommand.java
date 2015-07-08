@@ -3,7 +3,7 @@ package drawcommand;
 import application.GridCanvasController;
 import application.GridCanvasController.Drawtype;
 
-public class DrawtypeChangeCommand implements Command {
+public class DrawtypeChangeCommand extends ChangeCommand {
 	private GridCanvasController canvasController;
 	private GridCanvasController.Drawtype drawType;
 

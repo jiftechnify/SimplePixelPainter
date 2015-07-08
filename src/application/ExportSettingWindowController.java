@@ -4,6 +4,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Window;
+import org.controlsfx.validation.Severity;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -21,14 +24,21 @@ public class ExportSettingWindowController implements Initializable {
     @FXML
     private Label labelSize;
 
+    private ValidationSupport vs = new ValidationSupport();
+
     private GridCanvasProperty property;
     private FileFormat selectedFormat;
     private int selectedZoomLevel;
     private boolean whiteAsTransparent;
     private boolean okPressed = false;
 
+    private static final String VALIDATE_MESSAGE = "1-50の整数を入力してください";
+    private static final String VALIDATE_PATTERN = "[1-9]|[1-4][0-9]|50";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        vs.registerValidator(textZoomLevel, false,
+                Validator.createRegexValidator(VALIDATE_MESSAGE, VALIDATE_PATTERN, Severity.ERROR));
         checkWhite.selectedProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     whiteAsTransparent = newValue;
@@ -38,18 +48,13 @@ public class ExportSettingWindowController implements Initializable {
 
         textZoomLevel.textProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    int zoomLevel;
-                    try {
-                        zoomLevel = Integer.valueOf(newValue);
-                    } catch (NumberFormatException ex) {
-                        labelSize.setText("");
-                        return;
+                    if(textZoomLevel.getText().matches(VALIDATE_PATTERN)) {
+                        int zoomLevel = Integer.valueOf(textZoomLevel.getText());
+                        labelSize.setText(
+                                property.numPixelX * zoomLevel + "*" + property.numPixelY * zoomLevel);
                     }
-                    if (zoomLevel < 1)
-                        return;
-
-                    labelSize.setText(
-                            property.numPixelX * zoomLevel + "*" + property.numPixelY * zoomLevel);
+                    else
+                        labelSize.setText("");
                 }
         );
 
@@ -59,20 +64,14 @@ public class ExportSettingWindowController implements Initializable {
 
     @FXML
     private void onBtnOKPressed() {
-        okPressed = true;
-        try {
+        if(textZoomLevel.getText().matches(VALIDATE_PATTERN)){
             selectedZoomLevel = Integer.valueOf(textZoomLevel.getText());
-        } catch (NumberFormatException ex) {
-            showAlert();
-            return;
+            selectedFormat = choiceFormat.getValue();
+            okPressed = true;
+            getWindow().hide();
         }
-        if (selectedZoomLevel < 1) {
+        else
             showAlert();
-            return;
-        }
-
-        selectedFormat = choiceFormat.getValue();
-        getWindow().hide();
     }
 
     @FXML
@@ -86,7 +85,7 @@ public class ExportSettingWindowController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("");
         alert.getDialogPane().setHeaderText("警告");
-        alert.getDialogPane().setContentText("1以上の整数を入力してください。");
+        alert.getDialogPane().setContentText(VALIDATE_MESSAGE);
         alert.show();
     }
 

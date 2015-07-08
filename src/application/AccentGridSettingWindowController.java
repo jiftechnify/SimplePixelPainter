@@ -8,6 +8,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Window;
+import org.controlsfx.validation.Severity;
+import org.controlsfx.validation.ValidationSupport;
+import org.controlsfx.validation.Validator;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -16,21 +19,26 @@ import java.util.ResourceBundle;
  * Created by jiftech on 2015/07/03.
  */
 public class AccentGridSettingWindowController implements Initializable {
-    @FXML
-    private TextField txtMarginX;
-    @FXML
-    private TextField txtMarginY;
-    @FXML
-    private Slider sliderColor;
-    @FXML
-    private Rectangle rectColor;
+    @FXML private TextField txtMarginX;
+    @FXML private TextField txtMarginY;
+    @FXML private Slider sliderColor;
+    @FXML private Rectangle rectColor;
+
+    private ValidationSupport vs = new ValidationSupport();
 
     private AccentGridProperty initProperty;
     private AccentGridProperty newProperty;
     private boolean okPressed = false;
 
+    private static final String VALIDATE_MESSAGE = "1-100の整数を入力してください";
+    private static final String VALIDATE_PATTERN = "[1-9][0-9]?|100";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        vs.registerValidator(txtMarginX, false,
+                Validator.createRegexValidator(VALIDATE_MESSAGE, VALIDATE_PATTERN, Severity.ERROR));
+        vs.registerValidator(txtMarginY, false,
+                Validator.createRegexValidator(VALIDATE_MESSAGE, VALIDATE_PATTERN, Severity.ERROR));
         sliderColor.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     rectColor.setFill(Color.hsb((double) newValue, 1.0, 0.9));
@@ -40,22 +48,16 @@ public class AccentGridSettingWindowController implements Initializable {
 
     @FXML
     private void onOKButton() {
-        int marginX, marginY;
-        try {
-            marginX = Integer.valueOf(txtMarginX.getText());
-            marginY = Integer.valueOf(txtMarginY.getText());
-        } catch (NumberFormatException ex) {
-            showAlert();
-            return;
+        if(txtMarginX.getText().matches(VALIDATE_PATTERN) && txtMarginY.getText().matches(VALIDATE_PATTERN)) {
+            int marginX = Integer.valueOf(txtMarginX.getText());
+            int marginY = Integer.valueOf(txtMarginY.getText());
+            newProperty = new AccentGridProperty(
+                    marginX, marginY, Color.hsb(sliderColor.getValue(), 1.0, 0.9));
+            okPressed = true;
+            getWindow().hide();
         }
-        if (marginX <= 0 || marginY <= 0) {
+        else
             showAlert();
-            return;
-        }
-        newProperty = new AccentGridProperty(
-                marginX, marginY, Color.hsb(sliderColor.getValue(), 1.0, 0.9));
-        okPressed = true;
-        getWindow().hide();
     }
 
     private void showAlert() {
@@ -63,7 +65,7 @@ public class AccentGridSettingWindowController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("");
         alert.getDialogPane().setHeaderText("警告");
-        alert.getDialogPane().setContentText("1以上の整数を入力してください");
+        alert.getDialogPane().setContentText(VALIDATE_MESSAGE);
         alert.show();
     }
 

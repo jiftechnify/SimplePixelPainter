@@ -11,4 +11,9 @@ public class ClearAllCommand implements Command {
 	public void execute() {
 		canvasController.clearAll();
 	}
+
+	@Override
+	public boolean isDrawCommand() {
+		return true;
+	}
 }

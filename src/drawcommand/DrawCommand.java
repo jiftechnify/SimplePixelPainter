@@ -10,5 +10,9 @@ public abstract class DrawCommand implements Command {
 		this.clear = clear;
 		this.canvasController = canvasController;
 	}
+
+	public boolean isDrawCommand(){
+		return true;
+	}
 }
 

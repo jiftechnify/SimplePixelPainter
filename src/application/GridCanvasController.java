@@ -411,14 +411,26 @@ public class GridCanvasController implements Initializable{
 	 */
 	@FXML
 	private void onMenuUndoClicked(ActionEvent e){
-		undoHistory.push(history.pop());
-		clearAll();
-		for (Command c : history)
-			c.execute();
+		if(!containsOnlyChangeCommand(history)) {
+			Command top;
+			do {
+				top = history.pop();
+				undoHistory.push(top);
+			}while(!top.isDrawCommand());
+
+			clearAll();
+			for (Command c : history)
+				c.execute();
+		}
 	}
 	@FXML
 	private void onMenuRedoClicked(ActionEvent e){
-		history.push(undoHistory.pop());
+		while(undoHistory.size() != 0) {
+			Command top = undoHistory.pop();
+			history.push(top);
+			if(top.isDrawCommand())
+				break;
+		}
 		clearAll();
 		for (Command c : history)
 			c.execute();
@@ -427,7 +439,13 @@ public class GridCanvasController implements Initializable{
 		undoHistory.removeAllElements();
 		history.push(command);
 	}
-
+	private boolean containsOnlyChangeCommand(Stack<Command> history){
+		for(Command c: history){
+			if(c.isDrawCommand())
+				return false;
+		}
+		return true;
+	}
 	/*
 	 * 拡大縮小
 	 */

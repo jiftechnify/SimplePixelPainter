@@ -20,4 +20,8 @@ public class RedrawCommand implements Command {
 	public void execute() {
 		canvasController.redraw(pixelData);
 	}
+	@Override
+	public boolean isDrawCommand(){
+		return true;
+	}
 }

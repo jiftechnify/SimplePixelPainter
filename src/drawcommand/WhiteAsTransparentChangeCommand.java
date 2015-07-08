@@ -5,7 +5,7 @@ import application.GridCanvasController;
 /**
  * Created by jiftech on 2015/07/06.
  */
-public class WhiteAsTransparentChangeCommand implements Command {
+public class WhiteAsTransparentChangeCommand extends ChangeCommand {
     private GridCanvasController canvasController;
     private boolean whiteAsTransparent;
 

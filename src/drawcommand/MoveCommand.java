@@ -25,4 +25,9 @@ public class MoveCommand implements Command {
     public void execute() {
         canvasController.move(pixelData, from, dest);
     }
+
+    @Override
+    public boolean isDrawCommand(){
+        return true;
+    }
 }
